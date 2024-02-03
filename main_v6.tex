@@ -1,0 +1,2052 @@
+\documentclass{uoc-es}[2012/02/16 v2.3 UOC document class]%Versión 2.3 de la clase UOC
+\usepackage[latin1]{inputenc} %Accentos
+\usepackage[spanish,es-nolists]{babel} %Castellano
+\usepackage[T1]{fontenc}
+\usepackage{estiluoc} % Estilo UOC v2.3
+%\usepackage{mathstone} %Tipografía Stone
+%\nofiles %Instrucción para la composición final de la tabla de contenidos.
+
+%\usepackage{dcolumn} %Definición de columnas de tablas con decimales
+%\newcolumntype{d}{D{,}{,}{2}}
+\usepackage{algorithm}
+\usepackage{algorithmicx,algpseudocode}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{bm} %Negreta en fórmules matemàtiques
+
+% jdelatorre
+\usepackage{mathrsfs}
+
+% jcasasr
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% para dibujar grafos
+% jcasasr
+%\usepackage{tikz}
+%\usepackage{graphicx} % figuras
+%\usepackage{subfig}% http://ctan.org/pkg/subfig
+%\newsubfloat{figure}
+
+%%%%%%%%%%%%%% Portada del módulo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\color[gray]{0.5}{Módulo 6}} %Título del módul
+\addtolength{\logotipoes}{0cm}%Paràmetre per a col·locar el logotip. 
+\renewcommand{\subtitle}{Modelos Generativos} %Subtítulo del módulo
+\author{Jordi de la Torre Gallart}
+\newcommand{\modul}{} %Número de módulo en la portada
+\newcommand{\credits}{1,0 créditos} %Créditos
+\renewcommand{\nroregistre}{xxx/xxxxx/xxx} %Codigo de módulo
+\renewcommand{\UOC}{CC-BY-SA}
+
+%%%%%%%%%%%%%% Encabezado de páginas %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\nommodul}{Modelos Generativos} %Codigo del módulo en encabezado.
+\newcommand{\modulEncap}{$\text{ }\bullet$} %Módulo en encabezado.
+
+%%%%%%%%%%Bibliografia%%%%%%%%%%
+
+%\usepackage{natbib-mod}
+
+%%%%%%%%%%%%%% Espacio para definir nuevas instrucciones  %%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ESCRIBID AQUÍ LAS NUEVAS INSTRUCCIONES
+
+%%%%%%%%%%%%%% Inicio del módulo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+%%%%%%%%%%%%% Pàgina blanca darrera la portada
+\newpage
+\mbox{ }
+\thispagestyle{empty}
+\newpage
+%%%%%%%%%%%%%
+
+\tableofcontents
+
+%%%%%%%%%%%%% Pàgina blanca darrera la portada, si fa falta
+%\newpage
+%\mbox{ }
+%\thispagestyle{empty}
+%\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{modul}{1}
+\normalbaroutside % Paquet ``programa.sty''
+\frenchspacing
+
+%%%%%%%%%%%%%%%% -------------CONTINGUT------------%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%
+% INTRODUCCIO %
+%%%%%%%%%%%%%%
+\previs[Introducción]
+\setcounter{page}{5}
+
+En este módulo se introducen los modelos generativos basados en arquitecturas de aprendizaje profundo. La finalidad de estos modelos es la generación de nuevos datos que se asemejan a los de entrenamiento. Veremos distintas formas de aproximar el problema, todas ellas basadas en aprendizaje profundo, entre las que se encuentran las redes de generación adversarias, los auto-codificadores variacionales (y arquitecturas derivadas) y los modelos basados en los mecanismos de difusión. 
+
+El objetivo de este módulo es presentar los conocimiento de base necesarios para introducirse en el ámbito de los modelos generativos y estar en condiciones de profundizar en estos aspectos mediante la consulta de la bibliografía especializada. Este campo de conocimiento está en profunda evolución, por ello es clave no entender los conocimientos aquí presentados como un tratado concluso, sino como una puerta desde la que acceder a un campo de conocimiento que va mucho más allá de este módulo.
+
+%%%%%%%%%%%
+% OBJECTIUS %
+%%%%%%%%%%%
+\newpage
+\previs[Objetivos]
+
+Los objetivos que se pretende conseguir en este módulo se pueden resumir en los siguientes puntos:
+
+\newcounter{MiEnum}
+\begin{list}{\textbf{\theMiEnum. }}{\usecounter{MiEnum}\setlength{\labelwidth}{1.5cm}\setlength{\leftmargin}{0.5cm}}
+	\item Definir una nueva clase de modelos predictivos, denominados generativos.
+	\item Presentar algunas de las propuestas existentes para abordar el problema de generación de datos.
+	\item Introducir los fundamentos teóricos de las tres propuestas más exitosas hasta el momento para abordar el problema; a saber, la redes de generación antagónicas adversarias, auto-codificadores variacionales y los modelos basados en mecanismos de difusión.
+\end{list}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+% CONTINGUTS DEL MODUL %
+%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%
+% Capitol %
+%%%%%%%%
+\chapter{Introducción} 
+\label{chap:intro}
+
+En los módulos anteriores hemos estudiado diversas arquitecturas de redes neuronales que permiten modelizar funciones complejas para la evaluación de variables, todas ellas con finalidades de clasificación o de regresión. Estos modelos quedan recogidos bajo la clase de los denominados \textbf{modelos discriminativos}.
+
+En este módulo didáctico introduciremos una clase distinta de modelos: los \textbf{modelos generativos}. A diferencia de los primeros, su finalidad no estriba en la discriminación de los datos de entrada, sino la generación de instancias de datos equivalentes.
+
+Formalmente, dado un conjunto de datos $\boldsymbol{X}$ y unas etiquetas asociadas a los mismos $\textbf{y}$, el objetivo de los modelos discriminativos sería predecir funciones del tipo $P(\boldsymbol{y}|\boldsymbol{X})$, mientras que el de los generativos sería capturar $P(\boldsymbol{X},\boldsymbol{y})$ o simplemente $p(\boldsymbol{x})$ de manera que sea posible generar $\boldsymbol{x} \in \boldsymbol{X}$ o incluso pares $\boldsymbol{x},\boldsymbol{y} \in \boldsymbol{X}$.
+
+El objetivo de los modelos generativos es, por tanto, la generación datos similares (idealmente pertenecientes) a la población de la que deriva la muestra de datos que conforma el conjunto de entrenamiento.
+
+La tarea a abordar es significativamente más compleja que la que resuelven los modelos discriminativos. Por ejemplo, un modelo generativo de imágenes debe ser capaz de capturar las correlaciones existentes entre los diferentes elementos que aparecen en la imagen de forma que muestre de manera conjunta aquellos que es más probable que aparezcan juntos. Una manera de conseguir esto, es capturando sus elementos constitutivos. Eso requiere, idealmente, ser capaz de identificar la existencia de esos elementos así como su modelización independiente. Las distribuciones asociadas suelen ser complejas, en contraste con las regularidades estadísticas que es necesario distinguir para establecer una clasificación típica de un modelo discriminativo.
+
+Esta diferenciación que hemos establecido también la podríamos analizar desde otra perspectiva, a saber, el tipo de datos que son necesarios para resolver estos problemas. Los modelos discriminativos históricamente se han resuelto utilizando un enfoque \textit{supervisado}, esto es, los datos están formados por un conjunto de instancias y un conjunto de etiquetas que han sido previamente identificadas por humanos expertos. En los modelos generativos no es necesaria la existencia de etiquetas, pues el objetivo de los mismos es la inferencia de propiedades internas a partir, únicamente, de la observación del conjunto de entrenamiento. El objetivo posterior es la generación de nuevas muestras que copien las propiedades definitorias de la población a la que representan. El tipo de aprendizaje requerido en este tipos de modelos es \textit{no supervisado}. 
+
+El desafío conceptual existente consiste en capturar la distribución de probabilidad de la población representada por los datos de entrada ($\text{Datos de entrenamiento} \sim P_{datos}(x)$), en un modelo que permita generar nuevas instancias que emulen el comportamiento observado ($\text{Muestras generadas} \sim P_{modelo}(z)$). 
+
+No únicamente nos interesa conseguir este objetivo sino también hacerlo de un modo similar al que lo hacemos los seres inteligentes, esto es, comprimiendo la información en entidades abstractas útiles. Una posible forma de abordar el problema es definir lo que denominamos \textit{variables latentes}, de menor dimensión representativa que la real y buscar un modelo algorítmico que permita encontrar la función capaz de reducir las dimensiones, maximizando la retención de información útil. Si el modelo resultante permite comprimir la información en un conjunto de variables reducido, se puede esperar que dichas variables contengan la información esencial y distintiva de los datos fuente, pudiéndose utilizar esa información para controlar la generación de datos en base al valor deseado de las variables latentes. Esta diferenciación en variables definitorias puede ser usada, por ejemplo, para el ajuste y la eliminación de sesgos en el conjunto de datos original, aumentando artificialmente aquellas variables separadas menos representadas. El conocimiento de estas variables también puede ser útil para la identificación de valores raros, esto es \textit{outliers}. Dependiendo del objetivo que persiga nuestro modelo nos servirá para identificarlos y separarlos (por ejemplo en sistemas de control de calidad de producto) o bien para incorporarlos como situaciones excepcionales a nuestro modelo y mejorar así su capacidad predictiva (por ejemplo situaciones excepcionales encontradas en sistemas de conducción asistida).
+
+Como hemos descrito, los modelos generativos son, en esencia, más complejos que los discriminativos y tienen un ámbito de aplicabilidad muy extenso. En los próximos capítulos introduciremos varias formas de abordar este desafío predictivo. Estudiaremos los auto-codificadores, las redes generativas adversarias y los modelos basados en difusión, todos ellos para la generación de imagen. Los modelos generativos de texto se estudian en el módulo dedicado a los transformadores.
+
+\chapter{Modelos probabilísticos}
+\label{chap:prob}
+
+En esta introducción vamos a introducir de los conceptos básicos de probabilidad \cite{koller2009probabilistic} que son claves para comprender la naturaleza probabilística de la mayoría de modelos generativos existentes, especialmente los auto-codificadores variacionales.
+
+\section{Modelización probabilística}
+
+Cuando tratamos de predecir eventos del mundo real utilizando las matemáticas, solemos utilizar operaciones entre variables que en su conjunto definen lo que denominamos modelos matemáticos. A veces puede interesar relacionar variables probabilísticas, esto es, variables que no tienen un valor numérico definido, sino que su valor está sometido a la incertidumbre. En estos casos, se pueden modelizar sus relaciones mediante distribuciones de probabilidad. 
+
+\subsection{Dificultades}
+
+La modelización probabilística tiene una serie de dificultades que vamos a intentar presentar a través de un ejemplo: 
+
+Supongamos que disponemos de un modelo probabilístico paramétrico para realizar la clasificación de correos de \textit{spam}. Este modelo podría tener la forma $p_\theta(y,x_1,...,x_n)$, donde $y$ es una variable binaria que puede tomar los valores \textit{spam} o \textit{no spam} y $x_1, x_2, ...,x_n$ las variables dependientes que supondremos, a efectos de simplicación, todas binarias. Si quisiéramos clasificar un nuevo correo nos fijaríamos en el valor de la función $p(y=1 | x_1, ..., x_n)$, esto es, la función que responde a la pregunta de cuál es la probabilidad de que $y$ sea spam condicionado a que $x_1, ..., x_n$ tengan un valor determinado.
+
+Si nos preguntamos sobre el dominio de la función que acabamos de definir nos daremos cuenta que es inmenso. Si tuviéramos que expresar en forma de tabla todos los valores que puede tomar la función necesitaríamos de un total de $2^{n+1}$ entradas. Si $n$ fuera igual al tamaño del vocabulario nos daríamos cuenta que sería claramente intratable, tanto desde el punto de vista computacional, como estadístico. Los métodos probabilísticos suelen tener relaciones entre variables que escalan de forma exponencial. Una forma de convertirlos en tratables es mediante la simplificación en base a la realización de suposiciones.
+
+\subsection{Representación}
+
+La representación no es un problema trivial. Ya hemos visto en el ejemplo del problema del \textit{spam}, de forma general, para un mensaje que puede contener $n$ palabras distintas, debemos especificar en el caso más general y sin suposiciones, $\mathcal{O}(2^n)$ parámetros. 
+
+\subsection{Inferencia}
+
+Supongamos que hemos sido capaces de encontrar la distribución conjunta de probabilidad de las variables que lo integran $p(x_1, x_2, ..., x_n)$. A continuación enumeramos las preguntas típicas que estaríamos interesados en responder.
+
+\begin{itemize}
+	\item \textit{Inferencia marginal}: Evaluación de la probabilidad de que una variable $x_1$ tome un valor independientemente del resto. $p(x_1) = \sum\limits_{x_2}\sum\limits_{x_3}\cdot\cdot\cdot\sum\limits_{x_n} p(x_1, x_2, ..., x_n)$
+	\item \textit{Inferencia Maximum a posteri (MAP)}: Da como resultado cuál es la configuración de variables más probable $\underset{x1,...,x_n}{\mathrm{argmax}}\,p(x_1,...,x_n)$.
+\end{itemize}
+
+En general la inferencia sobre la distribución de probabilidad suele requerir operaciones de complejidad NP-hard. La dificultad de estas operaciones está relacionada también con la estructura del grafo que describe la probabilidad, esto es, en el fondo con las características de la función de probabilidad.
+
+\section{Revisión de conceptos de probabilidad}
+
+Adaptado de \cite{maleki2000review}.
+
+\subsection{Elementos}
+
+A continuación realizamos la definición de algunos elementos básicos necesarios para la formalización de la probabilidad.
+
+\textbf{Espacio de la muestra $\Omega$}: Es el conjunto de todos los resultados posibles de un experimento aleatorio. Cada suceso $\omega \in \Omega$ se puede ver como una descripción completo de un estado en el mundo real al final del experimento.
+
+\textbf{Conjunto de eventos (o espacio de eventos)}: Un conjunto cuyos elementos $A \in F$ (llamados eventos) son un subconjunto de $\Omega$ (i.e. ($A  \subseteq \Omega$ es un subconjunto de los posibles resultados de un experimento))
+
+\textbf{Medida de probabilidad}: Una función $P: F \rightarrow \mathbb{R}$ con las siguientes propiedades:
+
+\begin{itemize}
+	\item $P(A) \ge 0$, para todo $A \in F$
+	\item Si $A_1, A_2, ...$ son eventos disjuntos (esto es, $A_i \cap A_j = \nullset$ cuando $i \ne j$), entonces $P(\union_i A_i) = \sum_iP(A_i)$
+	\item $P(\Omega) = 1$
+\end{itemize}
+
+A estas tres \textbf{propiedades} se las denomina \textbf{Axiomas de Probabilidad}.
+
+\subsection{Probabilidad condicional}
+
+Sea $B$ un suceso con probabilidad distinta de cero. Se define la probabilidad condicionada de un evento $A$ habiendo sucedido $B$ como:
+
+\begin{equation}
+	P(A|B) = \frac{P(A \cap B)}{P(B)}
+	\label{eq:cond-prob}
+\end{equation}
+
+En otras palabras, $P(A|B)$ es la probabilidad de que suceda $A$ después de haber observado que ha sucedido el evento $B$.
+
+\subsection{Regla de la cadena}
+
+Sea $S_1, ..., S_k$ una serie de eventos donde $P(S_i)\gt 0$. La regla de la cadena dice que:
+
+\begin{equation}
+	P(S_1 \cap S_2 \cap \cdot\cdot\cdot \cap S_k) = P(S_1)P(S_2|S_1)P(S_3|S_2\cap S_1)\cdot\cdot\cdot P(S_k|S_1 \cap S_2 \cap \cdot\cdot\cdot \cap S_{k-1})
+	\label{eq:prob-chain-rule}
+\end{equation}
+
+En el caso de $k=2$, entonces la regla de la cadena coincide con la ecuación \ref{eq:cond-prob}.
+
+\subsection{Independencia}
+
+Se dice que dos eventos son independientes si $P(A \cap B) = P(A)P(B)$, o bien equivalentemente cuando $P(A|B) = P(A)$. Intuitivamente, $A$ y $B$ son independientes cuando conocer $B$ no afecta a la probabilidad de $A$.
+
+\section{Variables aleatorias}
+
+Una variable aleatoria $X$ es una función $X: \Omega \rightarrow E$, donde $E$ es un espacio medible. Habitualmente se representa a las variables aleatorias como mayúsculas mientras que a los valores que puede tomar con minúsculas. Así, $X = x$ significa que asignamos el valor $x \in E$ a la variable aleatoria $X$. Para variables reales representamos como $P(a \le X \le b) := P(\{ \omega : a \le X(\omega) \le b\})$.
+
+Si queremos indicar que la variable $A$ toma el valor $1$ lo podemos indicar de la siguiente forma $\boldsymbol{1}\{A\}$. Otro ejemplo sería:
+
+\begin{equation}
+	\boldsymbol{1}\{X \gt 3\} = \left\{
+	\begin{array}{ll}
+		1 & \mathrm{si\ } x \gt 3 \\
+		0 & \mathrm{si\ } x \le 3 \\
+	\end{array}
+	\right.
+	\label{eq:prob-value}
+\end{equation}
+
+\section{Funciones de distribución acumulativa}
+
+Una distribución acumulativa de probabilidad (CDF) es una función $F_X(x): \mathbb{R} \rightarrow [0,1]$ que mide la probabilidad como $F_X(x) = P(X \le x)$. 
+
+Propiedades:
+
+\begin{itemize}
+	\item $0 \le F_X(x) \le 1$
+	\item $\lim_{x \rightarrow - \infty} F_X(x) = 0$
+	\item $\lim_{x \rightarrow + \infty} F_X(x) = 1$
+	\item $x \le y \Rightarrow F_X(x) \le F_X(y)$
+\end{itemize}
+
+\section{Funciones de masa de probabilidad}
+
+En el caso en el que el número de posibles valores que puede tomar una variable aleatoria $X$ sea finito, una forma más sencilla de representar la probabilidad es especificar directamente su valor para cada valor que pueda tomar. La función de masa de probabilidad (PMF) es una función $p_X: \mathbb{R} \rightarrow [0,1]$ para la que $p_X(x) = P(X=x)$. Para el caso de una variable aleatoria discreta, utilizamos la notación $Val(X)$ para referirnos al conjunto de todos los posibles valores que $X$ puede tener. Por ejemplo en el caso de que $X(\omega)$ fuera una variable aleatoria referida al número de caras que pueden salir al tirar 10 veces seguidas una moneda al aire, entonces $Val(X) = \{0,1,2,...,10\}$.
+
+Propiedades:
+
+\begin{itemize}
+	\item $0 \le p_X(x) \le 1$
+	\item $\sum_{x \in Val(x)}p_X(x)=1$
+	\item $\sum_{x \in A}p_X(x) = P(X \in A)$
+\end{itemize}
+
+\subsection{Funciones de densidad de probabilidad}
+
+Para alguna variables aleatorias continuas, la función distributiva acumulativa es diferenciable en todo su dominio. En estos casos, se puede definir la función de densidad de probabilidad (PDF) como la derivada de la CDF, a saber:
+
+\begin{equation*}
+f_X(x) = \frac{dF_X(x)}{dx}
+\end{equation*}
+
+Puntualizar que la PDF de una variable aleatoria continua no siempre existe (por ejemplo, en aquellos casos donde no es diferenciable en todos sus puntos).
+
+De acuerdo con las propiedades de derivación, para un pequeño $\delta x$, $P(x \le X \le x+\delta x) \approx f_X(x)\delta x$.
+
+Tanto los CDFs como los PDFs (cuando existen) se pueden usar para calculas probabilidades. Es importante hacer notar que $f_X(x) \ne P(X=x)$.
+
+Propiedades:
+
+\begin{itemize}
+	\item $f_X(x) \ge 0$
+	\item $\int_{-\infty}^{+\infty} f_X(x) \,dx$
+	\item $\int_{x \in A} f_X(x) \,dx = P(X\in A)$
+\end{itemize}
+
+\subsection{Esperanza}
+
+Supongamos que $X$ es una variable aleatoria discreta con una PMF $p_X(x)$ y $g:\mathbb{R} \rightarrow \mathbb{R}$ una función arbitraria. En este caso, $g(X)$ puede ser considerada también una variable aleatoria. Definimos la \textbf{esperanza} o \textbf{valor esperado} de $g(X)$ como
+
+\begin{equation*}
+	\mathbb{E}[g(X)] = \sum\limits{x \in Val(X)}g(x)(p_X(x))
+\end{equation*}
+
+Si $X$ es una variable aleatoria continua con una PDF $f_X(x)$, entonces el valor esperado de $g(X)$ se define como
+
+\begin{equation*}
+	\mathbb{E}[g(X)] = \int_{-\infty}^{\infty} g(x)f_X(x)\,dx
+\end{equation*}
+
+Intuitivamente, la esperanza de $g(X)$ puede ser vista como una media ponderada de los valores de $g(x)$ sobre todos los valores de x, donde los pesos vienen dados por $p_X(x)$ o $f_X(x)$. Como caso particular, observar que $\mathbb{E}[X]$ se obtiene cuando $g(x)=x$; este valor es conocido también como la media de la variable $X$.
+
+Propiedades:
+
+\begin{itemize}
+	\item $\mathbb{E}[a] = a$ para cualquier constante $a \in \mathbb{R}$
+	\item $\mathbb{E}[af(x)] = a \mathbb{E}[f(X)]$ para cualquier constante $a \in \mathbb{R}$
+	\item (Linealidad de la esperanza) $\mathbb{E}[f(X) + g(X)] = \mathbb{E}[f(X)] + \mathbb{E}[g(X)]$
+	\item Para una variable discreta aleatoria $X$, $\mathbb{E}[\boldsymbol{1}\{X=k\}] = P(X=k)$
+\end{itemize}
+
+\subsection{Varianza}
+
+La varianza de una variable aleatoria $X$ es una medida de lo concentrada que se encuentra la variable $X$ alrededor de su media. Formalmente, la variancia se define como $Var[X] = \mathbb{E}[(X-\mathbb{E}[X])^2]$
+
+Utilizando la propiedad de la esperanza definida en el apartado anterior, podemos derivar definiciones alternativas.
+
+\begin{equation*}
+	\begin{aligned}
+	\mathbb{E}[(X-\mathbb{E}[X])^2] = & \\
+	&= \mathbb{E}[X^2-2\mathbb{E}[X]X+\mathbb{E}[X]^2] = \\
+	&= \mathbb{E}[X^2] - 2 \mathbb{E}[X]\mathbb{E}[X] + \mathbb{E}[X]^2 = \\
+	&= \mathbb{E}[X^2] - \mathbb[X]^2
+	\end{aligned}
+\end{equation*}
+
+Propiedades:
+
+\begin{itemize}
+	\item $Var[a] = 0$ para cualquier constante $a \in \mathbb{R}$
+	\item $Var[a f(X)] = a^2 Var[f(X)]$ para cualquier constante $a \in \mathbb{R}$
+\end{itemize}
+
+\subsection{Algunas variables aleatorias comunes}
+
+\subsubsection{\textbf{Variables aleatorias discretas}}
+
+\begin{itemize}
+	\item $X \sim Bernoulli(p)$ donde ($0 \le p \le 1$): por ejemplo el resultado de tirar una moneda al aire para la que la probabilidad de salir cara es $p$.
+	\begin{equation*}
+		p(\boldsymbol{x}) = \left\{
+		\begin{array}{ll}
+			p & si \; x = 1 \\
+			1-p & si \; x = 0 \\
+		\end{array}
+		\right.
+	\end{equation*}
+	\item $X \sim Binomial(n,p)$ donde ($0 \le p \le 1$): por ejemplo la probabilidad de obtener $x$ caras en $n$ tiradas de moneda independientes donde $p$ es la probabilidad de que salga cara en una tirada.
+	\begin{equation*}
+		p(\boldsymbol{x}) = \binom{n}{x} \cdot p^x (1-p)^{n-x}
+	\end{equation*}
+	\item $X \sim Geométrica(p)$ donde ($p \gt 0$): por ejemplo la probabilidad de tener que realizar $x$ tiradas independientes para obtener la primera cara, donde $p$ es la probabilidad de que salga cara en una tirada.
+	\begin{equation*}
+		p(\boldsymbol{x}) = p(1-p)^{(x-1)}
+	\end{equation*}
+	\item $X \sim Poisson(\lambda)$ donde ($\lambda \gt 0$): distribución de probabilidad sobre los enteros positivos para modelizar la frecuencia de eventos raros.
+	\begin{equation*}
+		p(\boldsymbol{x}) = e^{-\lambda} \frac{\lambda^x}{x!}
+	\end{equation*}
+\end{itemize}
+
+\subsubsection{\textbf{Variables aleatorias continuas}}
+
+\begin{itemize}
+	\item $X \sim Uniforme(a,b)$ donde ($a \lt b$): densidad de probabilidad igual para cualquier valor situado entre $a$ y $b$.
+	\begin{equation*}
+		f(x) = \left\{
+		\begin{array}{ll}
+			\frac{1}{b-a} & si \; a \le x \le b \\
+			0 & otros \\
+		\end{array}
+		\right.
+	\end{equation*}
+	\item $X \sim Exponencial(\lambda)$ donde ($\lambda \gt 0$): densidad de probabilidad de decaimiento sobre los reales no negativos.
+	\begin{equation*}
+		f(x) = \left\{
+		\begin{array}{ll}
+			\lambda e^{-\lambda x} & si \; x \ge 0 \\
+			0 & otros \\
+		\end{array}
+		\right.
+	\end{equation*}
+	\item $X \sim Normal(\mu,\sigma^2)$ conocida como distribución gaussiana.
+	\begin{equation*}
+		f(x) = \frac{1}{\sqrt{2 \pi}\sigma}e^{- \frac{(x - \mu)^2}{2 \sigma^2}}
+	\end{equation*}
+\end{itemize}
+
+\subsection{Dos variables aleatorias}
+
+Hasta ahora hemos considerado eventos con una única variable aleatoria. Sin embargo, es habitual encontrarse con experimentos donde hay más de una variable. Por ejemplo, en el experimento de lanzar una moneda al aire podemos considerar, por una parte, el número total de caras que ha salido y, por otro, el número máximo de caras consecutivas que ha salido, que serían dos variables aleatorias.
+
+\subsubsection{\textbf{Distribuciones conjunta y marginal}}
+
+Supongamos que tenemos dos variables aleatorias $X$ y $Y$. Una forma de tratar con estas variables es hacerlo por separado. Si lo hacemos de este modo únicamente necesitaríamos $F_X(s)$ y $F_Y(y)$. Pero si queremos saber acerca de la interacción simultánea de las dos variables en un experimento aleatorio, entonces necesitamos una estructura más complicada llamada distribución acumulativa de $X$ e $Y$, definida como:
+
+\begin{equation*}
+	F_{XY}(x,y) = P(X \le x, Y \le y)
+\end{equation*}
+
+Conociendo la distribución acumulativa de $X$ e $Y$ se puede conocer la probabilidad de cualquier evento que incluya a $X$ e $Y$.
+
+La CDF conjunta $F_{XY}(x,y)$ y las distribuciones acumulativas $F_X(x)$ y $F_Y(y)$ están relacionadas del siguiente modo:
+
+\begin{equation*}
+	\begin{array}{l}
+		F_X(x) = \lim\limits_{y \rightarrow \infty} F_{XY}(x,y) \\
+		F_Y(y) = \lim\limits_{x \rightarrow \infty} F_{XY}(x,y) \\
+	\end{array}
+\end{equation*}
+
+A $F_X(x)$ y $F_Y(y)$ se les denomina distribuciones acumulativas marginales.
+
+Propiedades:
+
+\begin{itemize}
+	\item $0 \le F_{XY}(x,y) \le 1$
+	\item $\lim_{x,y \rightarrow \infty}F_{XY}(x,y)=1$
+	\item $\lim_{x,y \rightarrow -\infty}F_{XY}(x,y)=0$
+	\item $F_X(x) = \lim_{y \rightarrow \infty}F_{XY}(x,y)$
+\end{itemize}
+
+\subsubsection{\textbf{Funciones de masa de probabilidad conjunta y marginal}}
+
+Sean $X$ e $Y$ variables aleatorias discretas. Entonces la función conjunta de masa de probabilidad $p_{XY}: Val(X) \times Val(Y) \rightarrow[0,1]$ se define como:
+
+\begin{equation*}
+	p_{XY}(x,y) = P(X=x, Y=y)
+\end{equation*}
+
+Aquí, $0 \le P_{XY} (x,y) \le 1$ para todo $x,y$ y $\sum_{x \in Val(X)}\sum_{y \in Val(Y)} P_{XY}(x,y) = 1$
+
+Podemos relacionar también $P_X(x)$ con $P_{XY}(x,y)$ del siguiente modo:
+
+\begin{equation*}
+	p_X(x) = \sum\limits_y P_{XY}(x,y)
+\end{equation*}
+
+Nos referimos a $P_X(x)$ como la función de masa probabilística marginal. El proceso de anular el efecto de una de las variables se le denomina marginalización.
+
+\subsubsection{\textbf{Funciones de densidad de probabilidad conjunta y marginal}}
+
+Sean $X$ e $Y$ dos funciones continuas aleatorias con distribución conjunta de probabilidad $F_{XY}$. En caso de que $F_{XY}(x,y)$ sea diferenciable en todo su dominio podemos definir la función de densidad de probabilidad conjunta como:
+
+\begin{equation*}
+	f_{XY}(x,y) = \frac{\partial^2 F_{XY}(x,y)}{\partial x \partial y}
+\end{equation*}
+
+Como en el caso unidimensional, $f_{XY}(x,y) \ne P(X=x, Y=y)$, pero
+
+\begin{equation*}
+	\int \int_{(x,y) \in A} f_{XY}(x,y)\, dxdy = P((X,Y) \in A)
+\end{equation*}	
+
+donde $\int_{-\infty}^{+\infty} \int_{-\infty}^{+\infty} f_{XY}(x,y) = 1$
+
+Análogamente al caso discreto, definimos
+
+\begin{equation*}
+	f_X(x) = \int_{-\infty}^{+\infty}f_{XY}(x,y)\,dy
+\end{equation*}
+
+como la función de densidad de probabilidad marginal (o densidad marginal) de $X$. De forma análoga con $f_Y(y)$.
+
+\subsubsection{\textbf{Distribuciones condicionales}}
+
+El objetivo de las distribuciones condicionales de probabilidad es la integración de la influencia que ejerce de la información de sucesos relacionados en la probabilidad de un evento. Suponiendo que $P_X(x) \ne 0$, entonces
+
+\begin{equation*}
+	p_{Y|X}(y|x) = \frac{p_{XY}(x,y)}{p_X(x)}
+\end{equation*}	
+
+En el caso continuo y por analogía con el caso discreto, suponiendo que $f_X(x) \ne 0$,
+
+\begin{equation*}
+	f_{Y|X}(y|x) = \frac{f_{XY}(x,y)}{f_X(x)}
+\end{equation*}
+
+\subsection{Teorema de Bayes}
+
+El teorema de Bayes se puede representar con la ecuación\ref{eq:bayes}.
+
+\begin{equation}
+	P_{Y|X}(y|x) = \frac{P_{XY}(x,y)}{P_X(x)} = \frac{P_{XY}(x|y) P_Y(y)}{\sum_{y' \in Val(Y)} P_{X|Y}(x|y')P_Y(y')}	
+	\label{eq:bayes}
+\end{equation}
+
+A partir de esta ecuación se deriva una terminología que conviene conocer:
+
+\begin{itemize}
+	\item \textbf{Prior}, $P_Y(y)$ : probabilidad de que suceda $y$ antes de conocer $x$.
+	\item \textbf{Posterior}, $P_{Y|X}(y|x)$, probabilidad que suceda $y$ conociendo que ha sucedido $x$.
+	\item \textbf{Evidence}, $P_X(x)$ probabilidad del evento contra el que queremos condicionar.
+	\item \textbf{Likelihood}, $P_{XY}(x|y)$	
+\end{itemize}
+
+En el caso que $X$ e $Y$ sean variables continuas,
+
+\begin{equation}
+	f_{Y|X}(y|x) = \frac{f_{XY}(x,y)}{f_X(x)} = \frac{f_{XY}(x|y) f_Y(y)}{\int_{-\infty}^{+\infty} f_{X|Y}(x|y')f_Y(y')\,dy'}	
+	\label{eq:bayes-cont}
+\end{equation}
+
+\subsection{Independencia}
+
+Dos variables aleatorias $X$ e $Y$ son independientes si $F_{XY}(x,y) = F_X(x)\cdot F_Y(y)$. Equivalentemente,
+
+\begin{itemize}
+	\item Para variables aleatorias discretas, $p_{XY}(x,y) = p_X(x) \cdot p_Y(y)$ para todo $x \in Val(X)$ y $y \in Val(Y)$.
+	\item Para variables aleatorias discretas, $p_{Y|X}(y|x) = p_Y(y)$ siempre que $p_X(x) \ne 0$ para todo $y \in Val(Y)$.
+	\item Para variables aleatorias continuas, $f_{XY}(x,y) = f_X(x)f_Y(y)$ para todo $x,y \in \mathbb{R}$.
+	\item Para variables aleatorias continuas, $f_{Y|X}(y|x) = f_Y(y)$ siempre que $f_X(x) \ne 0$ para todo $y \in \mathbb{R}$.
+\end{itemize}
+
+\subsection{Esperanza y covarianza}
+
+Supongamos que tenemos dos variables aleatorias $X,Y$ y $g:\mathbb{R}^2 \rightarrow \mathbb{R}$ es una función de dichas variables. Entonces el valor esperado de $g$ se define como,
+
+\begin{equation*}
+	\mathbb{E}[g(X,Y)] = \sum\limits_{x \in Val(X)} \sum\limits_{y \in Val(Y)} g(x,y) p_{XY}(x,y)
+\end{equation*}
+
+Para el caso de variables continuas la expresión sería la siguiente,
+
+\begin{equation*}
+	\mathbb{E}[g(X,Y)] = \int_{-\infty}^{\infty} \int_{-\infty}^{\infty} g(x,y) f_{XY}(x,y)\,dx dy
+\end{equation*}
+
+Se define la covarianza como,
+
+\begin{equation*}
+	Cov[X,Y] = \mathbb{E}[(X-\mathbb{E}[X])(Y - \mathbb{E}[Y])]
+\end{equation*}
+
+Propiedades:
+
+\begin{itemize}
+	\item Linealidad de la esperanza: $\mathbb{E}[f(X,Y) + g(X,Y)] = \mathbb{E}(f(X,Y)] + \mathbb{E}[g(X,Y)]$
+	\item $Var[X+Y] = Var[X] + Var[Y] + 2Cov[X,Y]$
+	\item Si $X$ e $Y$ son independientes, entonces $Cov[X,Y] = 0$
+	\item Si $X$ e $Y$ son independientes, entonces $\mathbb{E}[f(X)g(Y)] = \mathbb{E}[f(X)]\mathbb{E}[g(Y)]$
+\end{itemize}
+
+Estas ecuaciones son fácilmente generalizables para el caso de variables múltiples. En la bibliografía se pueden encontrar referencias donde consultar las ecuaciones para esos casos.
+
+
+\chapter{Modelos generativos basados en redes antagónicas o adversarias (GANs)}
+\label{chap:gans}
+
+\section{Introducción}
+
+Las redes antagónicas generativas o redes adversarias generativas (GANs) (\cite{goodfellow2020generative}, \cite{creswell2018generative}, \cite{cohen2022generative}) son un método para la optimización competitivo entre dos redes neuronales, una llamada generadora y otra discriminadora, con el objetivo de conseguir generar nuevas instancias idealmente indistinguibles a las pertenecientes a la distribución de probabilidad de la que derivan los datos de entrenamiento.
+
+El fundamento teórico general del que derivan, permite su utilización para la generación de cualquier tipo de datos, habiéndose demostrado efectiva en campos diversos como son la visión por computador (\cite{dziugaite2015training}, \cite{karras2017progressive}, \cite{ledig2017photo}), la segmentación semántica (\cite{luc2016semantic}, \cite{isola2017image}, \cite{wang2018high}, \cite{hoffman2018cycada}), la síntesis de series temporales (\cite{hartmann2018eeg}), la edición de imagen (\cite{shaham2019singan}, \cite{lample2017fader}, \cite{abdal2021styleflow}, \cite{xia2022gan}), el procesamiento del lenguaje natural (\cite{fedus2018maskgan}, \cite{jetchev2016texture}, \cite{guo2018long}), la generación de imagen a partir de texto (\cite{ramesh2021zero}, \cite{radford2021learning}, \cite{patashnik2021styleclip}) entre otros. 
+
+Para cualquier conjunto de datos, podemos hipotetizar que es posible definir una distribución de probabilidad $p_{data}$ representativa de la población representada por la muestra formada por el conjunto de datos. De ser esto posible, para cualquier valor de $\boldsymbol{x}$ será posible establecer un valor $P_{data}(\boldsymbol{x})$ que determine la probabilidad de que $\boldsymbol{x}$ pertenezca a la población. De existir una función de este tipo, sería una función discriminativa que dada una instancia permitiría conocer la probabilidad de pertenencia a la población. Los modelos generativos modelizan la distribución de probabilidad mencionada pero no proporcionan un valor de probabilidad, sino que generan instancias nuevas que pertenecen a distribuciones de probabilidad próximas a la que pretenden asemejar. Las GANs definen un esquema de aprendizaje que facilita la codificación de los atributos definitorios de la distribución de probabilidad en una red neuronal de manera que la red incorpore la información esencial que le permite generar instancias pertenecientes a distribuciones de probabilidad próximas a la que el conjunto de datos que pretende representar.
+
+En la siguiente sección se presenta el esquema básico de la arquitectura GAN y su aspecto distintivo, la naturaleza de la función objetivo utilizada para su optimización. Posteriormente, se presentan las arquitecturas y funciones de objetivo derivadas, así como sus aplicaciones.
+
+\section{El concepto de redes antagónicas}
+
+La arquitectura GAN está formada por dos redes neuronales constituyentes: una denominada discriminadora ($D$) y otra generadora $G$. La red $G$ se encarga de generar nuevas instancias del mismo dominio que el del conjunto de datos de origen. La red $D$ se encarga de discriminar si los datos de entrada son reales, esto es pertenecientes al conjunto de datos de entrada o bien son ficticios, esto es generados artificialmente. Ambas redes se entrenan de manera conjunta de manera que $G$ maximice sus posibilidades de no ser detectada por $D$ y $D$ de forma que haga cada vez más sofisticados sus métodos de detección de los datos generados artificialmente por $G$. Estas dos redes adversarias compiten en un juego de suma cero en el que se hipotetiza que eventualmente llegan a un equilibrio de Nash \cite{moghadam2021game}.
+
+\begin{figure}[ht!]
+	\titolfigura[1cm]{Figura \ref{fig:gan}. Diagrama representativo del proceso de entrenamiento de las redes adversarias generativas (GANs)}
+	\centering
+	\includegraphics[width=\textwidth]{figs/gan.pdf}
+	\label{fig:gan}
+	% \vspace{-5pt}\peufigura{Fuente: \url{http://www.ibmbigdatahub.com/infographic/four-vs-big-data}}
+\end{figure}
+
+En la figura \ref{fig:gan} se muestra un diagrama representativo del proceso de optimización de las GAN. Un vector $\boldsymbol{z}$ es muestreo de una distribución de probabilidad aleatoria $p_z$, $\boldsymbol{z} \sim p_z$ y alimentado como entrada a $G$. El propósito de la optimización es conseguir que $G(\boldsymbol{z}) \sim p_g$ acabe siendo una estimación de la distribución de probabilidad $P_{data}$. Las GAN se optimizan la función min-max de un juego de suma cero expresado por la ecuación \ref{eq:loss-gan}.
+
+\begin{equation}
+	\min_G \max_D \mathbb{E}_{x \sim p_r} \log[D(\boldsymbol{x})] + \mathbb{E}_{\boldsymbol{z} \sim p_{\boldsymbol{z}}} \log [1 - D(G(\boldsymbol{z}))]	
+	\label{eq:loss-gan}
+\end{equation}
+
+Equivalentemente, sean $p_\theta$, $D_{\omega}$ las redes neuronales generadora y discriminadora de una GAN, siendo $\theta$ los parámetros de $G$ y $\omega$ los de $D$. Ambas redes se optimizan en conjunto con la función objetivo definida por la ecuación \ref{eq:loss-gan-v2}.
+
+\begin{equation}
+	\min_{\theta} \max_{\omega} \mathbb{E}_{x \sim Q} \log[D_{\omega}(x)] + \mathbb{E}_{x \sim p_\theta} \log [1 - D_{\omega}(x))]	
+	\label{eq:loss-gan-v2}
+\end{equation}
+
+%
+%La finalidad de la red generadora, como su nombre indica, %será generar nuevas instancias, mientras que la función de %la discriminadora será identificar si una instancia %ecuación \ref{eq:loss-gan} muestra la función de %optimización a resolver para las dos redes adversarias.
+%
+
+Durante el proceso de optimización la red $D$ recibirá como entrada de manera aleatoria datos pertenecientes al conjunto de datos y otros procedentes de la red $G$. Se optimizará su funcionamiento para que su discriminación sea efectiva (ecuación \ref{eq:gradient-discriminator}).
+
+\begin{equation}
+	\nabla_{\theta_D} \frac{1}{m}\sum\limits_{i=1}^m[\log D(\boldsymbol{x}^{(i)}) + \log(1-D(G(\boldsymbol{z}^{(i)})))]	
+	\label{eq:gradient-discriminator}
+\end{equation}
+
+Al mismo tiempo, cuando $D$ reciba una entrada procedente de $G$, éste se optimizará para mejorar sus predicciones y hacer cada vez más difícil el papel de $D$. Esto únicamente se puede conseguir mejorando la calidad de los datos generados y haciéndolos más parecidos al conjunto de datos original (ecuación \ref{eq:gradient-generator}). 
+
+\begin{equation}
+	\nabla_{\theta_G}\frac{1}{m}\sum\limits_{i=1}^m \log(1-D(G(\boldsymbol{z}^{(i)})))
+	\label{eq:gradient-generator}
+\end{equation}
+
+Se establece así una competición entre las dos redes (de ahí el nombre de adversarias) de forma que idealmente en el progreso de este proceso ambas mejoran su funcionamiento al punto que idealmente el generador acaba produciendo datos cada vez más parecidos a los del conjunto de datos original.
+
+\section{Ventajas e inconvenientes de las GAN}
+
+Desde su introducción en 2014, las GANs han despertado un gran interés sobre todo en el campo de la generación de imagen. Esto ha sido debido a que presentan una serie de ventajas sobre el otro paradigma dominante hasta el momento en lo que a modelos generativos se refiere, los VAEs \cite{kingma2013auto}. Dichas ventajas son las siguientes:
+
+\begin{itemize}
+	\item \textbf{Imágenes más nítidas}: Las GANs producen imágenes más nítidas que otros modelos generativos disponibles hasta el momento. Los modelos de difusión que veremos más adelante son una excepción posterior en este aspecto.
+	\item \textbf{Tamañno configurable}: El tamaño de la variable aleatoria no está restringido pudiéndose enriquecer en caso de ser necesario.
+	\item \textbf{Generador versátil}: El paradigma de diseño basado en GANs soporta distintos tipos de funciones generadoras, a diferencia de otros modelos generativos que pueden tener restricciones debido a su arquitectura. Los VAEs, por ejemplo, obligan a utilizar una función Gaussiana en la primera capa del Generador.
+\end{itemize}
+
+La arquitectura también tiene sus desventajas entre las que están las siguientes:
+
+\begin{itemize}
+	\item \textbf{Colapso de modo}: Durante el entrenamiento sincronizado de generador y discriminador, el generador puede tener tendencia a reproducir únicamente un modo específico que es capaz de burlar al discriminador. A pesar de que este patrón puede estar minimizando la función objetivo, lo hace sin cubrir todo el dominio del conjunto de datos.
+	\item \textbf{Desvanecimiento de gradientes}: A veces el discriminador se optimiza demasiado rápido en su función. En estos casos, los gradientes que propaga pueden ser demasiado bajos para asegurar la optimización del generador.
+	\item \textbf{Inestabilidad}: A menudo durante el entrenamiento los parámetros de ambas redes fluctúan sin encontrar un punto de equilibrio. En estas circunstancias el generador tiene dificultades en encontrar un punto que genere imágenes de alta calidad.
+\end{itemize}
+
+\section{Arquitecturas derivadas}
+
+En esta sección se presentan aquellas arquitecturas derivadas de la original que mejoran su rendimiento en alguna de las desventajas mencionadas.
+
+\subsection{GAN semi-supervisada (SGAN)}
+
+SGAN \cite{odena2016semi} incluye una variación en el discriminador que le permite aprovechar las ventajas de contar con datos supervisados. Consiste en añadir un cabezal adicional para la predicción de la clase de pertenencia. En aquellos casos reales que se conoce dicha clase, se utiliza el cabezal softmax de predicción para optimizar al discriminador. En aquellos que no se conozca, se utiliza la optimización vía clasificación binaria típica de la GAN convencional. Los resultados demuestran que este tipo de entrenamiento mejora las capacidades de SGAN respecto a la GAN original.
+
+\subsection{Conditional GAN (CGAN)}
+
+CGAN \cite{mirza2014conditional} modifica el método original introduciendo una entrada adicional tanto en el generador como en el discriminador. Esta entrada adicional sirve como condicionante para ambas funciones. Esta nueva información $y$ se fusiona en el generador con el muestreo de la variable aleatoria $z$ para posteriormente generar la nuevas instancias. Lo mismo ocurre en el discriminador donde $y$ se integra con los datos $x$ a analizar. La nueva función de optimización queda como indica la ecuación \ref{eq:loss-cgan}.
+
+\begin{equation}
+	\min_G \max_D \mathbb{E}_{x \sim p_r} \log[D(\boldsymbol{x | y})] + \mathbb{E}_{\boldsymbol{z} \sim p_{\boldsymbol{z}}} \log [1 - D(G(\boldsymbol{z | y}))]	
+	\label{eq:loss-cgan}
+\end{equation}
+
+\subsection{Red antagónica generativa convolucional profunda (DCGAN)}
+
+Las redes antagónicas generativas convolucionales profundas (DCGAN) fueron introducidas por primera vez en \cite{radford2015unsupervised} como método para la generación de imágenes. Utilizan convoluciones en el discriminador y convoluciones traspuestas \cite{dumoulin2016guide} en el generador. Además de mejoras en la resolución de las imágenes generadas, consiguen mejoras en la estabilidad del entrenamiento que en su estudio atribuyen a la introducción de las siguientes modificaciones:
+
+\begin{itemize}
+	\item Sustitución de todas las capas de \textit{pooling} de las dos redes. En el discriminador se utilizan núcleos con \textit{stride} mayor que 1 y en el generador convoluciones traspuestas para aumentar el tamaño de la imagen.
+	\item Uso de la normalización por lotes en las dos redes.
+	\item En el discriminador se cambia la función de activación de ReLU a LeakyReLU \cite{maas2013rectifier}. En el generador se utilizan ReLU en todas las capas excepto en la última donde se usa la función de activación tangente hiperbólica (tanh).
+\end{itemize}
+
+\subsection{Progressive GAN (PROGAN)}
+
+En \cite{karras2017progressive} se introduce un método progresivo de entrenamiento y aumento de la resolución de las imágenes generadas que da muy buenos resultados. Muchas de las arquitecturas GAN más exitosas usan este método. En el trabajo citado se empieza entrenando una red generativa de 4x4 para ir añadiendo capas en el generador y discriminador conforme va avanzando el entrenamiento hasta conseguir resoluciones de salida de 1024x1024. Conforme se van añadiendo capas, todas las capas anteriores siguen estando sometidas a los cambios inherentes a la optimización de las redes.
+
+\subsection{Self-attention GAN (SAGAN)}
+
+Muchas de las implementaciones existentes hasta el momento fallan en la captura de patrones geométricos y estructurales de largo alcance. Se hipotetiza que la causa de esto es debida a la naturaleza convolucional de las arquitecturas generativas. Debido a ella, las dependencias son de corto alcance y requieren del paso a través de varias capas para ser resueltas. Existen diversas soluciones que se pueden aplicar para solucionar este aspecto. La primera sería aumentar el tamaño de las convoluciones con el aumento asociado de los requerimientos computacionales. Otra sería el incremento de la profundidad de las redes. Una tercera posibilidad, que es la propuesta por SAGAN \cite{zhang2019self} es la utilización de mecanismos de auto-atención en alguna de las capas de la red convolucional.
+
+Los atributos de salida $\boldsymbol{x} \in \mathbb{R}^{C \times N}$ de una capa de la red neuronal se transforman en dos espacios $\boldsymbol{f}(\boldsymbol{x}) = \boldsymbol{W}_f\boldsymbol{x}$ y $\boldsymbol{g}(\boldsymbol{x}) = \boldsymbol{W}_g\boldsymbol{x}$ para posteriormente calcular la atención como indica la ecuación \ref{eq:att-sagan}.
+
+\begin{equation}
+	\beta_{j,i} = \frac{\exp(s_{i,j})}{\sum\limits_{i=1}^N \exp(s_{i,j})} \quad \text{ donde } \quad s_{i,j} = \boldsymbol{f}(\boldsymbol{x}_i)^T \boldsymbol{g}(\boldsymbol{x}_j) 	
+	\label{eq:att-sagan}
+\end{equation}
+
+$\beta_{j,i}$ indica la atención que está prestando a la región $i$ cuando está generando la $j$. $C$ es el número de canales y $N$ el número de atributos de la anterior capa. La salida de la capa de atención $\boldsymbol{o} = (\boldsymbol{o}_1, \boldsymbol{o}_2, ... \boldsymbol{o}_N) \in \mathbb{R}^{C \times N}$ se puede expresar como indica la ecuación \ref{eq:out-att-sagan}.
+
+\begin{equation}
+	\boldsymbol{o}_j = \boldsymbol{v} \Big( \sum\limits_{i=1}^N \beta_{j,i} \boldsymbol{h}(\boldsymbol{x}_i)\Big) \text{ , } \boldsymbol{h}(\boldsymbol{x}_i) = \boldsymbol{W}_h \boldsymbol{x}_i \text{ , } \boldsymbol{v}(\boldsymbol{x}_i) = \boldsymbol{W}_v \boldsymbol{x}_i
+	\label{eq:out-att-sagan}
+\end{equation}
+
+Donde $\boldsymbol{W}_g \in \mathbb{R}^{\bar{C} \times C}$, $\boldsymbol{W}_f \in \mathbb{R}^{\bar{C} \times C}$, $\boldsymbol{W}_h \in \mathbb{R}^{\bar{C} \times C}$ y $\boldsymbol{W}_v \in \mathbb{R}^{C \times \bar{C}}$ son matrices optimizadas en tiempo de entrenamiento, implementadas como convoluciones 1x1. En el artículo se fija $\bar{C} = C/8$ por ser más eficiente de cara a la computación y, según se indica, no afectar significativamente a los resultados.
+
+El valor de auto-atención considerado se escala y se suma al valor del atributo de entrada, $\boldsymbol{y}_i = \gamma \boldsymbol{o}_i + \boldsymbol{x}_i$ siendo $\gamma$ un parámetro optimizable que se inicializa a cero. Esto tiene su lógica pues al inicio del entrenamiento se puede esperar resolver las dependencias locales para que una vez avanzada la optimización se afine resolviendo las dependencias de mayor alcance. Este mecanismo de atención se aplica tanto al generador como al discriminador. Ambos son optimizados minimizando una versión modificada de la función de optimización original, que toma la forma de la ecuación \ref{eq:loss-gan-hinge}. Esta ecuación es la versión de máximo-margen (Hinge Loss) típica para la optimización de SVMs \cite{crammer2001algorithmic}.
+
+
+\begin{equation}
+	\begin{array}{c}
+		L_D = - \mathbb{E}_{(x,y) \sim P_{data}} [ \min(0, -1 + D(x,y))] - \mathbb{E}_{z \sim p_z, y \sim P_{data}}[\min(0,-1-D(G(z), y))] \\
+		L_G = - \mathbb{E}_{z \sim p_z, y \sim P_{data}}G(G(z),y)
+	\end{array}
+	\label{eq:loss-gan-hinge}
+\end{equation}
+
+Junto con su propuesta presentan también una metodología de entrenamiento para estabilizar el inherentemente inestable proceso de optimización de las GANs.
+
+\subsection{BigGAN}
+
+BigGAN \cite{brock2018large} es un tipo de GAN diseñada para la generación, mediante escalado, de imágenes de alta resolución. Incluye una serie de cambios incrementales respecto a las redes anteriormente mencionadas así como también algunas innovaciones.
+
+Entre las mejoras incrementales de relevancia encontramos las siguientes:
+
+\begin{enumerate}
+	\item Propuesta de arquitectura basada en SAGAN utilizando normalización espectral \cite{miyato2018spectral} tanto para $D$ como para $G$ y utilizando TTUR \cite{heusel2017gans}.
+	\item Al igual que SAGAN utiliza la función de pérdida Hinge como objetivo de optimización
+	\item Utiliza normalización por lotes condicionada a la clase (CBN) \cite{de2017modulating} (mediante proyección lineal)  para proveer de información de la clase a $G$.
+	\item Utiliza un discriminador por proyección \cite{miyato2018cgans} para incorporar la información de la clase.
+\end{enumerate}
+
+\textB{TTUR:}{\textbf{Two Time-scale Update Rule (TTUR)} es una regla de actualización de los pesos de las GAN utilizando descenso de gradiente, consistente en el uso de tasa de aprendizaje distintas en generador y discriminador. Se sabe que el discriminador es capaz de converger a un mínimo local cuando el generador permanece estable. De cara a asegurar la convergencia, la idea es utilizar tasas de aprendizaje más bajas en el generador que en el discriminador. De esta manera aseguramos la convergencia de ambas redes a un punto de equilibrio de Nash.}
+
+\textB{CBN:}{\textbf{Conditional Batch Normalization (CBN)} 
+	Es una variante de la normalización batch condionada a la clase. Dado un mapa de atributos con $C$ canales, donde $\gamma_c$ y $\beta_c$ representan los parámetros de normalización de cada canal y para los que la regla de actualización viene representada por $\hat{\beta}_c = \beta_c + \Delta \beta_c$ y $\hat{\gamma}_c = \gamma_c + \Delta \gamma_c$, entonces $\Delta \beta = MLP_1(\boldsymbol{e}_q)$ y $\Delta \gamma = MLP_2(\boldsymbol{e}_q)$. Para el caso de BigGAN MLP es una transformación lineal y $\boldsymbol{e_p}$ la clase.
+}
+
+En cuanto a las innovaciones resaltar:
+
+\begin{enumerate}
+	\item Incremento del tamaño de los lotes.
+	\item Incremento del tamaño de capa.
+	\item Adición de conexiones directas entre la variable latente $z$ y las capas intermedias de la red.
+	\item Uso de una variante de regularización ortogonal 
+	\cite{brock2016neural}.
+\end{enumerate}
+
+BigGAN consigue una mejora sustancial de la calidad de las imágenes generadas para tamaños de 128x128, 256x256 y 512x512, aumentando el número de parámetros (x4) y incrementando el tamaño del batch de entrenamiento (x8) respecto a SAGAN. Además de las modificaciones indicadas, introducen algunos cambios sobre las variables latentes, durante el proceso de inferencia consistentes en truncar los valores fuera de un rango determinado.
+
+\subsection{StyleGAN}
+
+StyleGAN \cite{karras2019style} propone una nueva arquitectura para el generador, manteniendo el mismo diseño para el discriminador. En la figura \ref{fig:stylegan} se muestra un esquema de la arquitectura propuesta para la red generadora. 
+
+\begin{figure}[ht!]
+	\titolfigura[1cm]{Figura \ref{fig:stylegan}. Diagrama de la arquitectura StyleGAN}
+	\centering
+	%\includegraphics[width=0.5\textwidth]{figs/StyleGAN.drawio-925x1024.png}
+	\label{fig:stylegan}
+	\vspace{-5pt}\peufigura{Fuente: \url{https://github.com/christianversloot/machine-learning-articles/blob/main/stylegan-a-step-by-step-introduction.md}}
+\end{figure}
+
+StyleGAN tiene tres componentes característicos: 
+
+\begin{enumerate}
+	\item Crecimiento progresivo del tamaño de la imagen generada al estilo de PROGAN (bloques en amarillo) ($4\times 4 \rightarrow 8 \times 8 \rightarrow 16\times 16 \rightarrow 32\times 32 \rightarrow 64\times 64 \rightarrow 128\times 128 \rightarrow 256\times 256 \rightarrow 512\times 512 \rightarrow 1024 \times 1024$)
+	\item En los bloques de Upsample utiliza muestreo bilinear en vez de la copia del valor de los vecinos cercanos.
+	\item Sustitución del vector de entrada $z \sim P_z$ por una matriz de entrada constante de $4 \times 4 \times 512$ y se introduce una red de ruido gaussiano, que alimenta independientemente a cada una de las capas intermedias.
+	\item Introducción de la denominada \textit{Red de mapeo del ruido}, que al paso por varias capas completamente conectadas, transforma una entrada aleatoria en una representación interna de los estilos. La salida de esta red actúa como entrada en los bloques AdaIN de cada capa fijando los parámetros de sesgo y escalado del bloque con la finalidad de actuar como estilos adaptativos. 
+	\item AdaIN. Normalización adaptativa de las instancias: Introducida inicialmente en \cite{huang2017arbitrary}. StyleGAN la utiliza tanto como capa de normalización como para establecer el estilo a través de los parámetros de escalado y sesgo que son derivados de las representaciones internas aprendidas por la red de mapeo de ruido.
+\end{enumerate}	
+
+
+% Batch Norm vs Instance norm vs Adaptative inst norm
+
+\section{f-GAN una generalización de las GANs}
+
+En las secciones previas, hemos presentado a las GANs como una herramienta para generar datos, que se optimiza para producir resultados que se parezcan a los datos de entrenamiento. Se ha explicado cómo este proceso se lleva a cabo a través de la optimización de un modelo parametrizable en forma de red neuronal, midiendo la diferencia entre la distribución del modelo y la real durante el proceso de entrenamiento.
+
+En este apartado, exploraremos cómo distintas formas de medir esta distancia pueden dar lugar a diferentes funciones objetivo y, por lo tanto, a distintas redes resultantes. Este concepto se ha formalizado en el artículo \cite{nowozin2016f}, que proporciona una generalización del concepto de distancia en GANs para diferentes formas de medir la distancia entre distribuciones de probabilidad.
+
+
+\subsection{Introducción}
+
+Un modelo probabilístico es una representación formal que describe un evento o fenómeno en términos de una distribución de probabilidad, en lugar de proporcionar una respuesta única como lo hacen los modelos deterministas. Estos modelos se utilizan para modelar procesos estocásticos, donde los resultados no están determinados de antemano y pueden variar con el tiempo o en función de las condiciones.
+
+Cuando los principios que rigen un fenómeno son desconocidos o es demasiado complejo describirlos de manera computacionalmente eficiente, una forma de aproximar la solución es modelar su distribución de probabilidad a partir de muestras recopiladas del entorno. De esta manera, se pueden hacer predicciones y tomar decisiones basadas en una comprensión probabilística del fenómeno en cuestión.
+
+\subsection{Estimación de modelos probabilísticos}
+
+Suponiendo que existe una distribución de probabilidad real $Q$, se puede utilizar un modelo paramétrico $P$ para aproximar a $Q$. Para evaluar la validez de nuestro modelo debemos tener un medio de evaluar las diferencias entre ambas distribuciones. Sabemos que ambas variables son estocásticas, esto es, no están definidas por un único valor comparable sino que son distribuciones (funciones). Debemos disponer, por tanto, de una medida que nos permita comparar funciones. Una forma de hacer esto es realizar una abstracción del concepto de distancia para generalizarlo, no únicamente para medir distancias entre puntos, sino también para identificar distancias entre distribuciones de probabilidad. Para facilitar el proceso, puede ser necesario hacer algún tipo de suposición sobre $P$, como que su muestreo sea manejable, de cara a asegurar que las muestras del modelo sean comparables con las muestras reales; que $P$ tenga un gradiente manejable con respecto al muestreo de cara a poder utilizar técnicas de optimización y, finalmente, que tenga una función de probabilidad manejable de forma que pueda calcularse la probabilidad punto a punto.
+
+\subsection{GANs como modelos probabilísticos}
+
+Como ya sabemos, las GANs usan una combinación de dos redes neuronales para crear un modelo generativo con el objetivo de aprender a imitar una distribución real. El generador, como su nombre indica, genera una muestra modelo a partir de un vector aleatorio mediante el uso de una transformación determinista. El discriminador recibe muestras pertenecientes a la distribución real escogidas al azar y del modelo de generación y se entrena para diferenciarlas. Ambas redes están entrenadas de manera adversaria, una para generar imágenes lo más cercanas posible a la distribución real y la otra para detectar las muestras procedentes del generador. Aunque las GAN no proporcionan un valor de probabilidad de la imagen generada, es de esperar que este valor, aunque no sea conocido, exista.
+
+\subsection{Distancia entre distribuciones de probabilidad}
+
+Existen diferentes enfoques para definir la distancia entre las distribuciones de probabilidad. Podemos diferenciar principalmente entre tres enfoques diferentes:
+
+\begin{enumerate}
+	\item Métricas de probabilidad integral
+	\item Reglas para puntuación
+	\item f-divergencias
+\end{enumerate}
+
+\subsubsection{\textbf{Métricas de probabilidad integral}}
+
+Abordado por primera vez en las publicación \cite{sriperumbudur2010hilbert}, el punto clave de este método es que ambas distribuciones aparecen en forma de expectativa, lo que permite aproximarse a dicho valor mediante muestreo. La distancia de Wasserstein se deriva de estos métodos, y luego se usó con éxito como una distancia en Wasserstein-GAN \cite{arjovsky2017wasserstein}.
+
+\subsubsection{\textbf{Reglas para puntuación}}
+
+En \cite{gneiting2007strictly} se propuso el enfoque de utilizar una puntuación para evaluar la adecuación de una distribución a otra. El punto es la optimización de la puntuación. La puntuación máxima se logra cuando ambas distribuciones son iguales.
+
+\subsubsection{\textbf{f-divergencias}}
+
+Abordado por primera vez en \cite{ali1966general}, las distribuciones $P$ y $Q$ se requieren en forma de función de densidad. Las f-divergencias son una generalización de la divergencia Kullback-Leiber \cite{kullback1951information}. La expectativa de la distribución $Q$ se multiplica por una función convexa de la relación de verosimilitud entre $P$ y $Q$. Por lo general, no se aplica directamente porque normalmente no se dispone de la distribución de los datos de forma explícita.
+
+En \cite{nguyen2010estimating}, \cite{reid2011information} y en \cite{goodfellow2020generative} se desarrollaron métodos para usar f-divergencias en problemas donde $P$ tiene forma de distribución y $Q$ tiene forma de expectativa y también donde ambas distribuciones tienen forma de expectativa. Esto permitió el uso de tales métricas en problemas donde solo se encuentran disponibles muestras de ambas distribuciones.
+
+Matemáticamente, podemos definir la f-divergencia, denotada como $D_f(P\mid \mid Q)$, como la distancia entre dos distribuciones de probabilidad $P$ y $Q$ que se puede calcular mediante la ecuación \ref{eq:f-divergencia}.
+
+\begin{equation}
+	D_f(Q \mid \mid P) = \int_{\mathscr{X}} p(\boldsymbol{x}) f \left( \frac{q(x)}{p(\boldsymbol{x})} \right) dx
+	\label{eq:f-divergencia}
+\end{equation}
+
+donde $f$ es una función convexa, denominada función generador (nada que ver con el generador de las GANs), que cumple la propiedad $f(1) = 0$, esto es, que en aquellos puntos donde las dos funciones son iguales la distancia es cero. 
+
+La distancia siempre es ser mayor que 0 y es únicamente igual a cero cuando las dos distribuciones coinciden en todo el dominio $\mathscr{X}$.
+
+\begin{table}[ht!]
+	\centering
+	\titoltaula[0cm]{Tabla \ref{table:f-divergencias}. f-divergencias y generador asociado. Formas distintas de medir la distancia entre dos distribuciones de probabilidad $P$ y $Q$}
+	{\fontfamily{ps8}\fontsize{8}{8}\selectfont
+		\begin{tabular}{ l | c | c }
+			\hline %\rowcolor[gray]{0.8}
+			%% header
+			Nombre                     & $ D_f(P \mid \mid Q) $                 & Generador $ f(u) $ \\
+			\hline 
+			Total variation           & $\frac{1}{2}\int \mid p(\boldsymbol{x})-q(x)\mid dx$         & $\frac{1}{2}\mid u-1 \mid$    \\
+			\hline
+			Kullback-Leibler         & $\int p(\boldsymbol{x}) \log \frac{p(\boldsymbol{x})}{q(x)}dx $            & $ u \log u $   \\
+			\hline
+			Reverse Kulback-Leibler  & $\int q(x) \log \frac{q(x)}{p(\boldsymbol{x})}dx $            & $ - \log u $  \\
+			\hline
+			Pearson $\chi^2$       & $\int \frac{(q(x)-p(\boldsymbol{x}))^2}{p(\boldsymbol{x})}dx$             & $ (u-1)^2 $  \\
+			\hline
+			Neyman $\chi^2$        & $\int \frac{(p(\boldsymbol{x})-q(x))^2}{q(x)}dx$             & $ \frac{(1-u)^2}{u} $  \\
+			\hline
+			Squared Hellinger        & $\int (\sqrt{p(\boldsymbol{x})}-\sqrt{q(x)})^2 dx$           & $ (\sqrt{u}-1)^2 $  \\
+			\hline
+			Jeffrey                  & $\int (p(\boldsymbol{x}) - q(x))\log \left(\frac{p(\boldsymbol{x})}{q(x)}\right)dx)$ & $ (u-1) \log u $  \\
+			\hline
+			Jensen-Shannon           & $\frac{1}{2}\int p(\boldsymbol{x}) \log \frac{2p(\boldsymbol{x})}{p(\boldsymbol{x})+q(x)} + q(x) \log \frac{2q(x)}{p(\boldsymbol{x})+q(x)} dx$ & $-(u+1)\log \frac{1+u}{2} + u \log u$  \\
+			\hline
+			Jensen-Shannon weighted  & $\int p(\boldsymbol{x}) \pi \log \frac{p(\boldsymbol{x})}{\pi p(\boldsymbol{x})+(1-\pi)q(x)} + (1-\pi)q(x) \log \frac{q(x)}{\pi p(\boldsymbol{x})+ (1-\pi) q(x)} dx$ & $\pi u \log u + (1 - \pi + \pi u) \log (1 - \pi + \pi u)$  \\
+			\hline
+			GAN                      & $\int p(\boldsymbol{x}) \log \frac{2p(\boldsymbol{x})}{p(\boldsymbol{x})+q(x)} + q(x) \log \frac{2q(x)}{p(\boldsymbol{x})+q(x)} dx - \log 4 $& $u \log u - (u+1) \log (u+1)$  \\
+			\hline
+			$\alpha$-divergence    & $ \frac{1}{\alpha (\alpha - 1)} \int \left(p(\boldsymbol{x}) \left[\left(\frac{q(x)}{p(\boldsymbol{x})}\right)^{\alpha} - 1\right] - \alpha (q(x) - p(\boldsymbol{x}))\right)dx $ & $ \frac{1}{\alpha (\alpha - 1)} ( u^{\alpha} - 1 - \alpha(u-1)) $  \\
+			\hline
+		\end{tabular}
+	}
+	\label{table:f-divergencias}
+\end{table}
+
+\subsubsection{\textbf{Estimación de las f-divergencias mediante muestreo}}
+
+En \cite{nguyen2010estimating} se deriva un método variacional general para estimar las f-divergencias a partir del muestreo de las distribuciones $P$ y $Q$.
+
+Del análisis de funciones convexas sabemos que toda función convexa $f$ tiene un conjugado de Fenchel $f^*$ para el que se cumple que $ f(u) = \displaystyle\sup_{t \in dom_{f^*}} \{ tu - f^* (t) \} $, esto es, que cualquier función convexa puede ser representada como un conjunto de máximos puntuales de funciones lineales. Siendo $ f^*(t) $ el punto de intercepción con el eje de $y$ para cada punto $t$.
+
+\begin{equation*}
+	D_f(Q \mid \mid P) = \int_{\mathscr{X}} p(\boldsymbol{x}) f ( \frac{q(x)}{p(\boldsymbol{x})} ) dx \ge 
+\end{equation*}
+
+\begin{equation*}
+	\ge \displaystyle\sup_{T \in \mathscr{T}} ( \int_{\mathscr{x}} q(x)T(x)dx - \int_{\mathscr{X}}p(\boldsymbol{x})f^*(T(x))dx) = 
+\end{equation*}
+
+\begin{equation}
+	= \sup_{T \in \mathscr{T}}\left( \mathbb{E}_{x \sim Q}[T(x)] -  \mathbb{E}_{x \sim P}[f^*(T(x))]\right)
+	\label{eq:variational-f-divergence}
+\end{equation}
+
+Las expresiones pueden ser convertidas a expectativas y utilizadas en un algoritmo de muestreo. Un punto a tener en cuenta es que para algunas divergencias, $ f^* $ únicamente está definido para un dominio restringido. En esos casos, antes de utilizar la función objetivo, debe ser mapeada al dominio donde está definida.
+
+\subsubsection{\textbf{Función variacional asociada al discriminador}}
+
+En el artículo introductorio de las GAN \cite{goodfellow2020generative} se demuestra que la optimización propuesta para la función de pérdida (eq. \ref{eq:loss-gan-v2}) es equivalente a minimizar la divergencia de Jensen-Shanon.
+
+Comparando la expresión de la ecuación \ref{eq:variational-f-divergence} con la función objetivo de GAN vemos que $ T(x) = log(D_{\omega}(x)) $. Confirmamos pues que la GAN original minimiza la divergencia Jensen-Shanon, una caso particular de la f-GAN.
+
+\subsection{Conclusión}
+
+En esta sección se ha generalizado el concepto de medida de la distancia entre distribuciones de probabilidad, utilizado en la función de pérdida de las GAN, para poderlo usar en un contexto más general con cualquier f-divergencia para la medida de la distancia entre la distribución de probabilidad del modelo y la original. En este contexto más general, se ha demostrado que la GAN original es un caso particular de optimización que utiliza la f-divergencia de Jensen-Shanon para la medida de la distancia entre distribuciones. Cualquiera de las medidas alternativas presentadas da lugar a optimizaciones equivalentes, a pesar de ser distintas, desde un punto de vista representativo.
+
+\subsection{Funciones de optimización mejoradas}
+
+En la anterior sección hemos introducido el concepto de f-divergencia para generalizar el concepto de distancia entre distribuciones y hemos nombrado otros métodos alternativos como las métricas de probabilidad integral. En esta sección presentaremos las opciones de optimización que en la práctica han demostrado ser más efectivas para mejorar los problemas relacionados con la optimización min-max original, esto es, el colapso de modo y el desvanecimiento de gradientes. Los objetivos presentados a parte de remediar estos aspectos también mejora la calidad de las imágenes generadas.
+
+\subsubsection{\textbf{Wasserstein GAN (WGAN)}}
+
+WGAN \cite{arjovsky2017wasserstein} resuelve el problema del desvanecimiento de gradientes y colapso de modo reemplazando la optimización de la f-divergencia de Jensen Shanon mediante el uso de la métrica de probabilidad integral EM (Earth mover distance \cite{hitchcock1941distribution}) también llamada distancia de Wasserstein. La ecuación \ref{eq:wasserstein-distance} muestra la ecuación que la define.
+
+\begin{equation}
+	W(p_r, p_g) = \inf\limits_{\gamma \in \prod(p_r, p_g)} \mathbb{E}_{(x,y) \sim \gamma} [||x-y||]
+	\label{eq:wasserstein-distance}
+\end{equation}
+
+donde $\prod(p_r, p_g)$ representa en conjunto de todas las distribuciones conjuntas $\gamma(x,y)$ cuyos marginales son $p_r$ y $p_g$. La distancia EM representa el mínimo coste necesario para transportar la "masa" de $p_r$ a $p_g$ para conseguir hacerlas iguales.
+
+Las f-divergencias como KL y JS muestran problemas de inestabilidad cuando $p_r$ y $p_g$ están muy alejadas una de otra. EM es estable también en estos casos, además de ser continua, hecho que facilita la derivación de gradientes útiles para llevar a cabo la optimización. Un inconveniente es que el ínfimo de la ecuación \ref{eq:wasserstein-distance} es intratable. Por esa razón los autores de WGAN estiman el coste de EM con la ecuación  \ref{eq:wasserstein-distance-tractable}.
+
+\begin{equation}
+	W(p_r, p_g) \approx \max\limits_{w \sim \mathscr{W}} \mathbb{E}_{\boldsymbol{x} \sim p_r} [f_w(\boldsymbol{x})] - \mathbb{E}_{\boldsymbol{z} \sim p_z}[f_w(G(\boldsymbol{z}))]
+	\label{eq:wasserstein-distance-tractable}
+\end{equation}
+
+donde ${f_w}_{w \in \mathscr{W}}$ es una familia de funciones paramétricas que son K-Lipschitz para algún $K(||f||_L) \le K)$.
+
+Los autores proponen encontrar la mejor función $f_w$ que maximiza la eq. \ref{eq:wasserstein-distance-tractable} propagando el gradiente $\mathbb{E}_{\boldsymbol{z} \sim p_z}[f_w(G(\boldsymbol{z}))]$, donde $g_\theta$ es el generador $g$ con parámetros $\theta$. $f_w$ puede ser representada por $D$ pero condicionada a ser K-Lipschitz. $w$ en $f_w$ representa a los parámetros de $D$ y el objetivo de $D$ es maximizar \ref{eq:wasserstein-distance-tractable}, que aproxima la distancia EM. Cuando $D$ es óptimo, \ref{eq:wasserstein-distance-tractable} se aproxima a la distancia EM real y $G$ se optimiza para minimizar la ecuación \ref{eq:wasserstein-distance-tractable-part2}.
+
+\textB{k-Lipschitz}{\textbf{Definición:} 
+	Sea $A \subseteq \mathbb{R}$, $A \ne \nullset$ y $k \in \mathbb{R}, k \gt 0$ decimos que una función $g: A \rightarrow \mathbb{R}$ es k-Lipschitz si $\forall x,y \in A |g(x) - g(y)| \le k |x-y|$. Intuitavamente, es una condición más fuerte que la continuidad y limita el grado de variación permitido de $g$ a un máximo fijado por la diferencia entre los dos valores $x$, $y$ considerados multiplicados por la constante $k$.
+}
+
+
+\begin{equation}
+	- \min\limits_{G} \mathbb{E}_{\boldsymbol{z} \sim p_z}[f_w(G(\boldsymbol{z}))]
+	\label{eq:wasserstein-distance-tractable-part2}
+\end{equation}
+
+WGAN suele tener unos gradientes más suaves y medibles en todo el dominio que otras f-divergencias y aprende mejor incluso cuando no está produciendo aún buenas imágenes.
+
+\subsubsection{\textbf{GAN auto-supervisada (SSGAN)}}
+
+SSGAN \cite{chen2019self} utiliza un sistema similar a la CGAN \cite{mirza2014conditional} pero sin la necesidad de contar con etiquetado explícito. Además introduce un nuevo elemento en la función de pérdida, el objetivo del cual es prever el valor de una clase que se deriva directamente de la naturaleza de la imagen analizada. Concretamente, los autores predicen la rotación de la imagen de 4 posibles valores. Este valor es conocido y calculable sin necesidad de etiquetar las imágenes y se demuestra útil para mejorar las capacidades predictivas del discriminador, así como para aprender representaciones útiles para la generación. La nueva función de pérdida tiene la forma indicada en la ecuación \ref{eq:ssgan-loss}.
+
+\begin{equation}
+	\begin{array}{c}
+		L_G = -V(G,D) - \alpha \mathbb{E}_{\boldsymbol{x} \sim p_G} \mathbb{E}_{r \sim \mathbb{R}}[\log Q_D(R=r \mid \boldsymbol{x}^r)]\\
+		L_D = -V(G,D) - \beta \mathbb{E}_{\boldsymbol{x} \sim p_{data}} \mathbb{E}_{r \sim \mathbb{R}}[\log Q_D(R=r \mid \boldsymbol{x}^r)]
+	\end{array}
+	\label{eq:ssgan-loss}
+\end{equation}
+
+donde V(G,D) es el objetivo general de la GAN original (ecuación \ref{eq:loss-gan}), P_{data} y P_G son las distribuciones real y del generador respectivamente, $r \in \mathbb{R}$ es la rotación seleccionada entre los ángulos permitidos ($R = \{0, 90, 180, 270\}$). Una imagen rotada $r$ grados se denota como $\boldsymbol{x}^r$ y $Q(R\mid \boldsymbol{x}^r)$ es la distribución predicha sobre los ángulos de rotación de la muestra. Esta función de pérdida fuerza a aprender representaciones internas de la rotación de forma supervisada hipotetizando que dichas representaciones serán útiles también para la generalización de las capacidades generativas de la GAN. SSGAN obtiene resultados comparables a los de CGAN sin la necesidad de etiquetado externo.
+
+\subsubsection{\textbf{Normalización espectral (SNGAN)}}
+
+En SNGAN \cite{miyato2018spectral} se propone el uso de normalización de los parámetros como medio de estabilización del entrenamiento del discriminador. Es una técnica que es computacionalmente eficiente y que puede ser aplicada de manera sencilla. Sabemos que si $D$ es una función k-Lipshitz , esto es, intuitivamente, que es una función continua sin variaciones abruptas, esto puede servir para estabilizar el entrenamiento de las GAN. SNGAN controla el valor de la constante de Lipschitz limitando la norma espectral de cada capa, normalizando la matriz de pesos de cada capa $W$ para satisfacer la restricción $\sigma(W)=1$ (esto es, que el mayor valor singular de la matriz de pesos sea 1). Esto se consigue simplemente normalizando cada capa mediante la ecuación \ref{eq:spectral-normalization}.
+
+\begin{equation}
+	\bar{\boldsymbol{W}}_{SN}(\boldsymbol{W}) = \frac{\boldsymbol{W}}{\sigma(\boldsymbol{W})}
+	\label{eq:spectral-normalization}
+\end{equation}
+
+donde $\boldsymbol{W}$ representa a la matriz de pesos de cada capa. En el artículo citado se demuestra que esta operación hace que la constante de Lipschitz en el discriminador quede limitada a un máximo de 1, hecho que facilita la optimización.
+
+SNGAN consigue mejoras importantes de los resultados comparado con las técnicas previas de estabilización del entrenamiento publicadas, entre las que se incluyen el recorte del valor de los pesos \cite{arjovsky2017wasserstein}, la penalización de gradientes \cite{wu2019gp}, \cite{mescheder2018training}, normalización batch \cite{ioffe2015batch}, normalización de pesos \cite{salimans2016weight}, normalización de capas \cite{lei2016layer} y regularización ortonormal \cite{brock2016neural}.
+
+\subsubsection{\textbf{SphereGAN}}
+
+SphereGAN \cite{park2020spheregan} es una GAN que utiliza métrica de probabilidad integral (IPM) que usa una hiperesfera para ligar la IPM a la función objetivo y de esta forma mejorar la estabilidad del entrenamiento. La función objetivo utilizada es la indicada en la ecuación \ref{eq:spheragan-loss}.
+
+\begin{equation}
+	\min\limits_G \max\limits_D \sum\limits_r \mathbb{E}_x[d_s^r(\boldsymbol{N}, D(\boldsymbol{x}))] - \sum\limits_r \mathbb{E}_z[d_s^r(\boldsymbol{N}, D(G(\boldsymbol{z})))]
+	\label{eq:spheragan-loss}
+\end{equation}
+
+para $r = 1, ..., R$ donde $d_s^r$ mide la distancia con momento $r$ entre cada muestra y el polo norte de la hiperesfera, $\boldsymbol{N}$. El subíndice $s$ indica que $d_s^r$ está definido en $\mathbb{S}^n$.
+
+Esta propuesta mejora a las anteriores funciones objetivo basadas en la distancia Wasserstein gracias a la definición de los IPM en la hiperesfera. Esto le permite prescindir de muchas de las restricciones que deben ser impuestas a $D$ para asegurar un entrenamiento estable en las anteriores propuestas, como las restricciones sobre la naturaleza Lischitz de las funciones requeridas por la distancia Wasserstein.
+
+El funcionamiento de SphereGAN se podría describir de la forma siguiente: la red $G$ genera datos a partir de un vector aleatorio $z$. Imágenes reales y otras las procedentes de $G$ se alimentan a la red discriminadora $D$ que, a diferencia de las propuestas anteriores, da como resultado un vector de dimensión $n$. SphereGAN re-mapea este vector en una hiper-esfera de n dimensiones utilizando transformaciones geométricas. Los puntos mapeados se utilizan para calcular los momentos geométricos centrados en el polo norte ($\boldsymbol{N}$) de dicha hiper-esfera. La red discriminadora intenta maximizar las diferencias de momento entre las imágenes reales y las falsas, mientras que la generadora intenta conseguir lo contrario.
+
+\section{Una aplicación de las GAN: aumento de datos}
+
+El aumento de datos es una técnica habitual para mejorar el entrenamiento de los modelos en aquellas circunstancias donde se dispone de pocos datos. Podríamos decir que las circunstancias más habituales que requieren aumento de datos serían las siguientes:
+
+\begin{itemize}
+	\item \textbf{Etiquetado limitado}: Disponer de pocos datos etiquetados.
+	\item \textbf{Diversidad limitada}: Cuando el conjunto de entrenamiento falta variedad en los datos.
+	\item \textbf{Datos restringidos}: Alguna de la información es sensible y no puede utilizarse directamente.
+\end{itemize}
+
+Los dos primeros casos se pueden resolver manualmente, poniendo recursos para etiquetar más datos, pero puede suponer un coste elevado. Una alternativa para el primer caso consiste en utilizar GANs para aumentar la cantidad de datos. SGAN, por ejemplo, permite generar nuevos datos anotados. El segundo caso es más habitual, pues suele ser habitual disponer de conjuntos de datos con clases desbalanceadas pobres en las clases raras.
+
+\section{Conclusiones}
+
+En este capítulo hemos introducido a las GAN como método para la generación de datos. Es un tipo de arquitectura especialmente estudiada en el campo de generación de imagen. Es un tipo de arquitectura con mucho potencial que tiene algunos problemas sobre todo relacionados con la estabilidad en el entrenamiento. En este capítulo hemos estudiado el diseño original, sus ventajas e inconvenientes así como algunas modificaciones destinadas a solventar los problemas de la propuesta original. Si bien hemos intentado describir los puntos que consideramos clave, el campo en cuestión es muy amplio, tanto en arquitecturas, como en aplicaciones. Este capítulo debe servir como punto de partida para complementarlo con la bibliografía citada así como con las futuras aportaciones.
+
+\chapter{Auto-codificadores}
+\label{chap:autoencoders}
+
+Antes de presentar los VAEs, consideramos apropiado brindar una breve introducción a la estructura general de los auto-codificadores. Esta arquitectura precede en la historia a los variacionales y comparte muchos aspectos en común, aunque sus aplicaciones no se enfoquen en la generación de datos como sucede con los VAEs. 
+
+\section{Introducción}
+
+Los auto-codificadores \cite{ackley1985learning}, \cite{hinton1993autoencoders}, \cite{michelucci2022introduction} son un tipo de red neuronal especializada en la representación de un espacio dimensional de origen en otro más pequeño. El objetivo de esta transformación es la representación de la información observada en un vector de menor dimensión que lo represente con la mayor fidelidad posible. Se pretende que dicha compresión sirva para codificar en la red una representación significativa de los verdaderos factores explicativos de las señales observadas. A la representación vectorial reducida se le denomina espacio latente. 
+
+Los auto-codificadores (fig. \ref{fig:autoencoder}) son una propuesta de arquitectura para llevar a cabo este proceso. Estos consisten en dos partes diferenciadas: un codificador que transforma el vector de datos inicial en una representación interna y un decodificador que a partir de esta última intenta reconstruir el original. Ambos elementos son redes neuronales la función de las cuales es modelizar la distribución de probabilidad de los datos de origen. La arquitectura se optimiza de forma global. El cuello de botella existente en la zona del espacio latente es el que, idealmente, obliga a la arquitectura a comprimir en representaciones más sencillas la información relevante a partir de la cual se reconstruirá el original.
+
+\begin{figure}[ht!]
+	\titolfigura[1cm]{Figura \ref{fig:autoencoder}. Esquema general de un auto-codificador}
+	\centering
+	\includegraphics[width=\textwidth]{figs/autoencoder.pdf}
+	\label{fig:autoencoder}
+	% \vspace{-5pt}\peufigura{Fuente: \url{http://www.ibmbigdatahub.com/infographic/four-vs-big-data}}
+\end{figure}
+
+\section{Definición formal}
+
+Sea $\mathcal{X}$ el espacio de los datos de entrada el $\mathcal{Z}$ el de la representación codificada, ambos espacios euclidianos, esto es $\mathcal{X} = \mathbb{R}^m$, $\mathcal{Z} = \mathbb{R}^n$, donde habitualmente $m > n$.
+
+Definimos dos funciones paramétricas denominadas codificador $E_{\phi} : \mathcal{X} \rightarrow \mathcal{Z}$, parametrizada por $\phi$ y decodificador $D_{\theta} : \mathcal{Z} \rightarrow \mathcal{X}$, parametrizada por $\theta$.
+
+Para cualquier $x \in \mathcal{X}$, denotamos como $z = E_{\phi}(x)$ a la variable latente $z \in \mathcal{Z}$ derivada de aplicar la función $E{\phi}$ a $x$ y a $x'=D_{\theta}(z)$ como la reproducción de $x$ mediante decodificación de $z$. Habitualmente las funciones paramétricas $E_{\phi}$ y $D_{\theta}$ son redes neuronales.
+
+\section{Entrenamiento}
+
+Para optimizar la arquitectura se debe definir una objeto matemático a optimizar. Para ello definimos inicialmente la función distancia $d$ como $d: \mathcal{X} \times \mathcal{X} \rightarrow [0, \infty]$, tal que $d(x,x')$ es una función distancia que mide la diferencia entre ambos vectores.
+
+Definida $d$, definiremos la función de optimización que minimiza la distancia sobre todo el conjunto de datos. Esto se puede hacer minimizando el valor esperado de la distancia sobre todo el conjunto de datos de origen:
+
+\begin{equation*}
+	L(\theta, \phi) = arg \min\limits_{\theta, \phi} \mathbb{E}_{x \sim \mu_{ref}}[d(x, D_{\theta}(E_{\phi}(x)))]
+\end{equation*}
+
+Para aquellos casos en que disponemos únicamente de un conjunto de datos finito representativo de $\mathcal{X}$, ${x_1, ..., x_N} \in \mathcal{X}$ entonces $\mu_{ref} = \frac{1}{N}\sum\limits_{i=1}^N \delta_{x_i}$. 
+
+Si se define $d$ como $d(x,x') = ||x-x'||^2$ entonces el problema se convierte en una optimización de mínimos cuadrados.
+
+\section{Auto-codificadores regularizados}
+
+El objetivo último del auto-codificador es conseguir una representación comprimida del vector de entrada, idealmente formada por sus factores constitutivos. Esto se pretende conseguir optimizando un objetivo matemático, aunque no siempre la optimización del segundo conduce al primero. Debido a que la optimización se realiza mediante el uso de una muestra finita de la población total, esto es, con un conjunto de entrenamiento finito, en determinadas circunstancias puede darse el caso que a la función paramétrica le sea más sencilla la memorización del conjunto de datos que el aprendizaje de representaciones sencillas. En estos casos, decimos que el auto-codificador aprende la función identidad. Este caso no es deseable, pues se aleja del objetivo que pretendemos conseguir.
+
+Una forma de evitar esto es dotar a la función de optimización de mecanismos de regularización que eviten la memorización. Dependiendo de cómo se realice esta regularización distinguimos entre distintas subclases de auto-codificadores, entre los que se encuentran los auto-codificadores poco densos, los de atenuación de ruido y los contractivos.
+
+\subsection{Auto-codificadores poco densos (SAE)}
+
+Los auto-codificadores poco-densos introducen una restricción en la codificación de manera que esta sea poco densa, en el sentido que únicamente se permita que unos pocos de los elementos de la representación latente estén activos. Hay dos formas básicas de conseguir este objetivo: la primera es fijar a cero todas las activaciones excepto las $k$ mayores, donde $k$ es un valor predefinido. A este se les denomina auto-codificador poco denso k \cite{makhzani2013k}; la segunda consiste en añadir a la función de pérdida original una función de regularización, esto es, $\min\limits_{\theta, \phi} L(\theta, \phi) + \lambda L_{sparsity}(\theta, \phi)$, donde $\lambda > 0$ fija cuánta baja densidad queremos aplicar \cite{ng2011sparse}. Para un auto-codificador de $K$ capas una propuesta para la función de pérdida de regularización sería la siguiente:
+
+\begin{equation*}
+	L_{sparsity}(\theta, \phi) = \mathbb{E}_{x \sim \mu_X} \Big[ \sum\limits_{k \in 1:K} \omega_k ||h_k|| \Big]
+\end{equation*}
+
+donde $h_k$ representa el valor del vector de la función de activación de la capa $k$ y $||\cdot||$ normalmente representa la norma L1 o la norma L2, dando lugar respectivamente a el auto-codificador poco denso L1 o L2.
+
+\subsection{Auto-codificadores de atenuación de ruido (DAE)}
+
+Los auto-codificadores de atenuación de ruido \cite{vincent2010stacked} introducen la regularización modificando la función de reconstrucción. Durante el entrenamiento, la entrada se distorsiona y se intenta recuperar la información original.
+
+El proceso de distorsión se hace mediante una función $T: \mathcal{X} \rightarrow \mathcal{X}$ que a partir de una señal de entrada $x \in \mathcal{X}$ la transforma en una versión distorsionada $T(x)$. El valor de $T$ se selecciona aleatoriamente con una distribución de probabilidad $\mu_T$.
+
+La función de optimización para el caso del DAE es:
+
+\begin{equation*}
+	\min\limits_{\theta, \phi} L(\theta, \phi) = \mathbb{E}_{x \sim \mu_X, T \sim \mu_T}[d(x,(D_{\theta} \circ E_{\phi} \circ T)(x))]
+\end{equation*}
+
+Funciones típicas utilizadas para la adición de ruido incluyen el ruido isotrópico gaussiano, ruido mediante enmascaramiento aleatorio de parte de la entrada o fijar a valores aleatorios parte de los elementos de la entrada.
+
+\subsection{Auto-codificador contractivo}
+
+Un auto-codificador contractivo \cite{rifai2011higher} añade una pérdida de regularización a la pérdida estándar del auto-codificador:
+
+\begin{equation*}
+	\min\limits_{\theta, \phi} L(\theta, \phi) + \lambda L_{contractive}(\theta, \phi)
+\end{equation*}
+
+donde $\lambda$ regula la importancia de la regularización contractiva, que se define como la norma de Frobenius \cite{van1996matrix} esperada del jacobiano de las activaciones del codificador respecto a la entrada:
+
+\begin{equation*}
+	L_{contractive}(\theta, \phi) = \mathbb{E}_{x \sim \mu_{ref}} || \nabla_x E_{\phi}(x) ||_F^2
+\end{equation*}
+
+Sabemos que $||E_{\phi} ( x + \delta x ) - E_{\phi} ( x ) ||_2 \le || \nabla x E_{\phi} ( x ) ||_F || \delta x ||_2$ para cualquier entrada $x \in \mathcal{X}$
+y pequeña variación $\delta x$ sobre ella. Por lo tanto, si $||\nabla_x E_{\phi}(x)||_F^2$ es pequeño, significa que valores alrededor de la entrada se asignan también a valores situados en un entorno próximo de su representación latente. Esta es una propiedad deseada, ya que significa que una pequeña variación de la entrada conduce a una pequeña variación, tal vez incluso cero, de su valor latente. Esto hace, por ejemplo, que dos imágenes puedan verse iguales incluso si no son exactamente iguales.
+
+El DAE puede entenderse como un límite infinitesimal de CAE: en el límite del ruido de entrada gaussiano, los DAE hacen que la función de reconstrucción resista las perturbaciones de entrada, mientras que el CAE hace que las características extraídas resistan perturbaciones de entrada infinitesimales.
+
+\section{Aplicaciones típicas}
+
+Las aplicaciones típicas de los auto-codificadores descritos en esta sección incluyen las siguientes:
+
+\begin{itemize}
+	\item Compresión: utilización de un auto-codificador para representar la señal de entrada con otra de dimensión menor. A efectos comparativos, cuando un auto-codificador usa una función lineal como codificador y decodificador, MSE como función de pérdida y los datos de entrada se normalizan de acuerdo a $\hat{x}_{i,j} = \frac{1}{\sqrt{M}}\Big( x_{i,j} - \frac{1}{M}\sum\limits_{k=1}^M x_{k,j}\Big)$ entonces es equivalente a un PCA \cite{plaut2018principal}.
+	\item Clasificación mediante el uso de atributos latentes: los atributos del espacio latente pueden ser utilizados para clasificar imágenes, por ejemplo, utilizando k-NN para llevar a cabo la separación (supervisada o no supervisada) \cite{pulgar2018aeknn}. 
+	\item Detección de anomalías: se entrena un auto-codificador en un conjunto de datos que contiene un conjunto representativo de las imágenes/datos que se quieren reconocer como válidas para luego calcular el error de reconstrucción de las imágenes/datos anómalas y compararlo con los errores de las imágenes/datos correctas. Si ambos conjuntos de imágenes/datos son suficientemente distintos, el error de reconstrucción de las anómalas será superior al de las correctas. Fijando el umbral en el punto correcto será posible detectar aquellas que sean anómalas pues su error de reconstrucción debería ser más alto \cite{chen2017outlier}, \cite{zhou2017anomaly}, \cite{pang2021deep}.
+	\item Atenuación de ruido en imágenes: el auto-codificador se utiliza para corregir errores en la imagen de entrada \cite{vincent2008extracting}, \cite{gondara2016medical}.
+\end{itemize}
+
+\chapter{Modelos generativos basados en auto-codificadores variacionales (VAEs)}
+\label{chap:vaes}
+
+\section{Introducción}
+
+Los VAEs (fig. \ref{fig:vae}) son una tipología de modelos gráficos probabilísticos basados en redes neuronales. Presentan una estructura similar a la de los auto-codificadores introducidos en el capítulo anterior. Permiten realizar inferencia eficiente en la presencia de variables latentes continuas (y/o discretas), con distribuciones intratables del posterior y utilizando conjuntos de datos de gran tamaño.
+
+Los VAEs son capaces de generar nuevos datos similares a los de la distribución de origen. Esto se consigue mediante la codificación, en forma de variables latentes, de las características definitorias de la distribución de probabilidad representada por la muestra poblacional del conjunto de datos original. A partir del modelo aprendido, son capaces de generar nuevas instancias que aproximan a dicha distribución. 
+
+Una red codificadora (también llamada red de reconocimiento) transforma la distribución de origen a un espacio latente estocástico representado por una distribución más sencilla (por ejemplo una distribución normal). A partir de la distribución latente se generan los datos de reconstrucción mediante el uso de una red decodificadora (o red de generación). 
+
+Al final del entrenamiento, si este ha sido efectivo, será posible generar nuevas instancias mediante el decodificador, transformando las muestras del espacio oculto al espacio de expresión. El codificador actúa como un modelo de reconocimiento, mientras que el decodificador como uno de generación. El modelo de reconocimiento proporciona al generador una aproximación del posterior sobre el espacio latente, que es utilizado para optimizar los parámetros de ambas redes mediante estimación por máxima verosimilitud. Según la regla de Bayes, el modelo de reconocimiento aproxima a la inversa del modelo generativo.
+
+\begin{figure}[ht!]
+	\titolfigura[1cm]{Figura \ref{fig:gan}. Diagrama representativo de la arquitectura VAE}
+	\centering
+	\includegraphics[width=\textwidth]{figs/VAE.pdf}
+	\label{fig:vae}
+	% \vspace{-5pt}\peufigura{Fuente: \url{http://www.ibmbigdatahub.com/infographic/four-vs-big-data}}
+\end{figure}
+
+\section{Modelos probabilísticos}
+
+Los modelos probabilísticos son una representación matemática de fenómenos afectos de incertidumbre. Estos quedan definidos mediante distribuciones de probabilidad. Suponiendo que $p^*(\boldsymbol{x})$ represente la distribución de probabilidad original, podemos intentar aproximarla mediante un modelo paramétrico $p_\theta(\boldsymbol{x})$ tal que $p_\theta(\boldsymbol{x}) \approx p^*(\boldsymbol{x})$. Es de interés que $p_\theta(\boldsymbol{x})$ sea capaz de adaptarse a las características de los datos de origen así como de incorporar información que conozcamos a priori, como por ejemplo, el conocimiento procedente de distribuciones de probabilidad condicionadas.
+
+A veces puede suceder que no interese modelizar $p_\theta(\boldsymbol{x})$ sino que nos sea suficiente con modelizar $p_\theta(\boldsymbol{y|x})$ con el objetivo de conseguir $p_\theta(\boldsymbol{y|x}) \approx p^*(\boldsymbol{y|x})$. Para simplificar la notación, en este capítulo nos referiremos a la modelización incondicional, aunque lo explicado aquí también aplique a la condicional.
+
+Los modelos gráficos probabilísticos (PGM) permiten representar a la distribución conjunta de probabilidad atendiendo a las interconexiones causales existentes entre las distintas variables.
+
+\begin{equation*}
+p_\theta(x_1, ..., x_M) = \prod\limits_{j=1}^M p_\theta(x_j | Pa(x_j))
+\end{equation*}
+
+donde $Pa(x_j)$ representa a los nodos padres de $x_j$. Para los nodos sin padres, la probabilidad referida será incondicionada.
+
+$p_\theta(x_j | Pa(x_j))$ puede ser definida de distintos modos, a saber, como una tabla de valores, como un modelo lineal o también como un red neuronal. En este último caso $p_\theta(x|Pa(\boldsymbol{x})) = p_\theta(\boldsymbol{x}|\eta)$, donde $\eta = RedNeuronal(Pa(\boldsymbol{x}))$.  Éstos últimos son modelos paramétricos muy versátiles que permiten modelizar funciones complejas y son una muy buena herramienta para modelizar distribuciones optimizables matemáticamente.
+
+\section{Optimización de modelos probabilísticos}
+
+Sea un conjunto de datos $\mathcal{D} = \{\boldsymbol{x}^{(1)}, ..., \boldsymbol{x}^{(N)}\} \equiv \{\boldsymbol{x}^{(i)}\}_{i=1}^{N} = \boldsymbol{x}^{(1:N)}$, donde $\boldsymbol{x}^{(i)}$ son muestras, independientes e idénticamente distribuidas (i.i.d), pertenecientes a una distribución subyacente. El modelo paramétrico que aproxima la distribución conjunta de probabilidad, será de la forma $p_\theta(\mathcal{D}) = \prod\limits_{\boldsymbol{x} \in \mathcal{D}} p_\theta(\boldsymbol{x})$ que en su versión logarítmica se expresa como $\log p_\theta(\mathcal{D}) = \sum\limits_{\boldsymbol{x} \in \mathcal{D}} \log p_\theta(\boldsymbol{x})$. La forma típica de calcular $\theta$ es optimizar esta función, esto es, la estimación por máxima verosimilitud (MLE) de las instancias pertenecientes al conjunto de datos $\mathcal{D}$. El método MLE equivale a la minimización de la divergencia de Kullback-Leibler entre la distribución de los datos y la del modelo \cite{broniatowski2014minimum}. Disponiendo de la función de optimización MLE ya es posible calcular los parámetros $\theta$ de la red neural utilizando los métodos de entrenamiento convencionales, por ejemplo, el descenso de gradiente estocástico.
+
+\section{Inferencia variacional (VI)\cite{ghojogh2021factor}}
+
+\subsection{Variables observables vs ocultas}
+
+Consideramos a una \textit{variable observable}, cuando forma parte de aquellas de las que disponemos de  su valor en los puntos que forman parte del conjunto de datos. Una \textit{variable oculta o latente} es aquella de la que no tenemos información directa a través del conjunto de entrenamiento conocido. Esta formalización permite conectar la información percibida a través de variables observadas con las abstracciones propias de los modelos interpretativos, que serían las variables ocultas o latentes que queremos calcular. Así, por ejemplo, en un conjunto de datos formado por imágenes, las variables observables serían los píxeles de los que disponemos de información, mientras que las ocultas de interés podrían ser las abstracciones en forma de modelos del mundo que hacemos los seres inteligentes, por ejemplo, los distintos tipos de objetos presentes en la imagen.
+
+\subsection{Formalización matemática}
+
+Supongamos que partimos de una distribución de probabilidad representada por un conjunto de datos $\mathcal{D}$, con $\boldsymbol{x} \in \mathcal{D}$, de la que queremos inferir una serie de propiedades ocultas (p.e. abstracciones), representadas por un conjunto de variables, originalmente desconocidas, que llamaremos $\boldsymbol{z}$. Sea $p(\boldsymbol{x}, \boldsymbol{z})$ la distribución conjunta de las variables observables y ocultas. 
+
+En estos casos, nos interesa realizar la inferencia acerca de las variables desconocidas, esto es, calcular $p(\boldsymbol{z}|\boldsymbol{x})$. Sabemos que este valor se puede representar como:
+
+\begin{equation*}
+	p(\boldsymbol{z}|\boldsymbol{x}) = \frac{p(\boldsymbol{x},\boldsymbol{z})}{p(\boldsymbol{x})} = \frac{p(\boldsymbol{x}|\boldsymbol{z}) p(\boldsymbol{z})}{p(\boldsymbol{x})}
+\end{equation*}
+
+Calcular $p(\boldsymbol{z}|\boldsymbol{x})$ a partir de la igualdad bayesiana puede tener su dificultad pues habitualmente alguna de las variables suele resultar intratable computacionalmente.
+
+La inferencia variacional trata de resolver el problema mediante una aproximación, esto es, restringiendo el espacio de búsqueda a una familia de funciones sencillas, predefinida de origen, que llamaremos familia de funciones variacional $q_\phi(\boldsymbol{z}|\boldsymbol{x})$. Es común, aunque no requisito, que la familia escogida sea la de funciones gaussianas.
+
+A partir de aquí, se convierte el problema original en uno de optimización consistente en encontrar los parámetros $\phi$ óptimos restringidos a la familia de funciones $q_\phi(\boldsymbol{z}|\boldsymbol{x})$ que minimizan la distancia existente entre las distribuciones $p(\boldsymbol{z}|\boldsymbol{x})$ y $q_\phi(\boldsymbol{z}|\boldsymbol{x})$. Habitualmente, la función de medida de distancia entre distribuciones escogida es la divergencia de Kullback-Leibler:
+
+\begin{equation*}
+	D_{KL}(q_\phi(\boldsymbol{z}|\boldsymbol{x}) || p(\boldsymbol{z}|\boldsymbol{x})) = \mathbb{E}_{z \sim q} \big[ \log \frac{q_\phi(\boldsymbol{z}|\boldsymbol{x})}{p(\boldsymbol{z}|\boldsymbol{x})} \big] = \sum_{x \in \mathcal{X}} q_\phi(\boldsymbol{z}|\boldsymbol{x})\log \Big( \frac{q_\phi(\boldsymbol{z}|\boldsymbol{x})}{p(\boldsymbol{z}|\boldsymbol{x})} \Big)
+\end{equation*}
+
+En este caso, el objetivo de la inferencia variacional es encontrar:
+
+\begin{equation*}
+	\hat{\theta} = arg \min\limits_\phi D_{KL}(q_\phi(\boldsymbol{z}|\boldsymbol{x}) || p(\boldsymbol{z}|\boldsymbol{x}))
+\end{equation*}
+
+Existen muchos algoritmos distintos para abordar este problema, cada uno con sus ventajas e inconvenientes que dependen de la naturaleza de $p(\boldsymbol{x},\boldsymbol{z})$ y de la familia subrogada de $q$. 
+
+La inferencia variacional define una estrategia genérica para abordar el problema, pero no un algoritmo concreto para conseguirlo.
+
+\subsection{Límite inferior de evidencia (ELBO)}
+
+Llegados a este punto, vamos a definir una variable nueva partiendo de $p(\boldsymbol{x})$ que nos será de utilidad para facilitar posteriormente la estrategia de optimización.
+
+Para ello nos serviremos de una la propiedad de las funciones convexas, denominada \textit{desigualdad de Jensen} que dice lo que sigue: sea $f$ una función convexa en el dominio $\mathcal{X}$, entonces $\mathbb{E}[f(x)] \le f(\mathbb{E}[x]), \forall x \in \mathcal{X}$. A efectos de nuestro caso concreto, si tomamos a $f$ como la función logarítmica, tenemos que $\mathbb{E}[\log(x)] \le \log(\mathbb{E}[x])$ para todo el dominio de la función.
+
+Utilizando dicha propiedad, simplificamos la expresión de $\log p(\boldsymbol{x})$, creando un límite inferior:
+
+\begin{equation*}
+	\begin{array}{cl}
+	\log p(\boldsymbol{x}) &= \log \int p(\boldsymbol{x},\boldsymbol{z}) \, d \boldsymbol{z} =\\ 
+	& = \log \int p(\boldsymbol{x},\boldsymbol{z}) \frac{q_\phi(\boldsymbol{z}|\boldsymbol{x})}{q_\phi(\boldsymbol{z}|\boldsymbol{x})} \, d \boldsymbol{z} = \\
+	& = \log \mathbb{E}_{z \sim q}  \frac{p(\boldsymbol{x},\boldsymbol{z})}{q_\phi(\boldsymbol{z}|\boldsymbol{x})} \, d \boldsymbol{z} \ge \\
+	& \ge \mathbb{E}_{z \sim q} \log \frac{p(\boldsymbol{x},\boldsymbol{z})}{q_\phi(\boldsymbol{z}|\boldsymbol{x})} \, d \boldsymbol{z} =\\ 
+	& =\mathbb{E}_{z \sim q} \log p(\boldsymbol{x},\boldsymbol{z}) - \mathbb{E}_{z \sim q} \log q_\phi(\boldsymbol{z}|\boldsymbol{x})\\
+	& = ELBO = \mathcal{L}_{\theta,\phi}(\boldsymbol{x})\\
+	\end{array}
+\end{equation*}
+
+A dicho límite inferior lo llamamos \textit{límite inferior de evidencia}, $ELBO$ en inglés o $\mathcal{L}_{\theta,\phi}(\boldsymbol{x})$ en su expresión matemática en este texto. 
+
+El ELBO también se puede expresar de forma alternativa como:
+
+\begin{equation*}
+	\begin{array}{cl}
+	\mathcal{L}_{\theta,\phi}(\boldsymbol{x}) & = \mathbb{E}_{z \sim q} \log p(\boldsymbol{x},\boldsymbol{z}) - \underbrace{\mathbb{E}_{z \sim q} \log q_\phi(\boldsymbol{z}|\boldsymbol{x})}_\text{Entropía de q}\\
+	& =  \underbrace{\mathbb{E}_{z \sim q} \log p(\boldsymbol{x} | \boldsymbol{z})}_\text{- Pérdida de reconstrucción} -  \underbrace{D_{KL}(q_\phi(\boldsymbol{z}|\boldsymbol{x}) || p(\boldsymbol{z}|\boldsymbol{x}))}_\text{KL entre q y el prior}\\
+	\end{array}
+\end{equation*} 
+
+
+\subsection{ELBO como medio de optimizar $q_\phi$}
+
+A continuación demostraremos que $D_{KL}(q_\phi(\boldsymbol{z}|\boldsymbol{x}) || p(\boldsymbol{z}|\boldsymbol{x})) = \log p(\boldsymbol{x}) - \mathcal{L}_{\theta,\phi}(\boldsymbol{x})$, esto es, que  maximizando el ELBO estamos minimizando también la distancia entre las distribuciones $p(\boldsymbol{z}|\boldsymbol{x})$ y $q_\phi(\boldsymbol{z}|\boldsymbol{x})$ y, por lo tanto, consiguiendo el objetivo buscado de aproximar $p(\boldsymbol{z}|\boldsymbol{x})$ con la función más sencilla $q_\phi(\boldsymbol{z}|\boldsymbol{x})$.
+
+Demostración:
+
+\begin{equation*}
+	\begin{array}{ll}
+	D_{KL}(q_\phi(\boldsymbol{z}|\boldsymbol{x}) || p(\boldsymbol{z}|\boldsymbol{x})) & = \mathbb{E}_{z \sim q} \Big[ \log \frac{q_\phi(\boldsymbol{z}|\boldsymbol{x})}{p(\boldsymbol{z}|\boldsymbol{x})} \Big] = \\
+	& = \mathbb{E}_{z \sim q} \Big[ \log q_\phi(\boldsymbol{z}|\boldsymbol{x}) \Big] - \mathbb{E}_{z \sim q} \Big[ \log p(\boldsymbol{z}|\boldsymbol{x}) \Big] =\\
+	& = \mathbb{E}_{z \sim q} \Big[ \log q_\phi(\boldsymbol{z}|\boldsymbol{x}) \Big] - \mathbb{E}_{z \sim q} \Big[ \log \frac{p(\boldsymbol{x},\boldsymbol{z})}{p(\boldsymbol{x})} \Big] = \\
+	& = \mathbb{E}_{z \sim q} \Big[ \log q_\phi(\boldsymbol{z}|\boldsymbol{x}) \Big] - \mathbb{E}_{z \sim q} \Big[ \log p(\boldsymbol{x},\boldsymbol{z}) \Big] + \mathbb{E}_{z \sim q} \Big[ \log p(\boldsymbol{x}) \Big]=\\
+	& = \log p(\boldsymbol{x}) - \Big( \mathbb{E}_{z \sim q} [ \log p(\boldsymbol{x},\boldsymbol{z}) ] - \mathbb{E}_{z \sim q} [\log q_\phi(\boldsymbol{z}|\boldsymbol{x})] \Big) = \\
+	& = \log p(\boldsymbol{x}) - \mathcal{L}_{\theta,\phi}(\boldsymbol{x})\\
+	\end{array}
+\end{equation*}
+
+Sabemos que el ELBO es un límite inferior de la evidencia, esto es,
+
+\begin{equation*}
+	\mathcal{L}_{\theta,\phi}(\boldsymbol{x}) = \log p_\theta(\boldsymbol{x}) - D_{KL}(q_\phi(\boldsymbol{z}|\boldsymbol{x}) || p(\boldsymbol{z}|\boldsymbol{x})) \le \log p_\theta(\boldsymbol{x})
+\end{equation*}
+
+
+A partir de esta ecuación podemos entender que maximizando el ELBO con respecto a los parámetros $\phi$ y $\theta$ se consiguen dos objetivos: por un lado maximizar la probabilidad marginal $p_\theta(\boldsymbol{x})$ (nuestro modelo generativo se vuelve mejor) y por otro minimizar la divergencia KL de la aproximación $q_\phi(\boldsymbol{z}|\boldsymbol{x})$ sobre el posterior exacto $p_\theta(\boldsymbol{z}|\boldsymbol{x})$ (la aproximación $q_\phi(\boldsymbol{z}|\boldsymbol{x})$ mejora).
+
+\section{El codificador como forma de aproximar al posterior}
+
+Nuestro objetivo es aproximar al posterior, esto es
+
+\begin{equation*}
+	q_\phi(\boldsymbol{z}|\boldsymbol{x}) \approx p_\theta(\boldsymbol{z}|\boldsymbol{x}) 
+\end{equation*}
+
+
+El modelo de inferencia puede ser un modelo del tipo:
+
+\begin{equation*}
+	q_\phi(\boldsymbol{z}|\boldsymbol{x}) = q_\phi(\boldsymbol{z}_1,...,\boldsymbol{z}_M|\boldsymbol{x}) = \prod\limits_{j=1}^M q_\phi(\boldsymbol{z}_j | Pa(\boldsymbol{z}_j), \boldsymbol{x})
+\end{equation*}
+
+donde $Pa(\boldsymbol{z}_j)$ es el conjunto de nodos precedentes a la variable $\boldsymbol{z}_j$. La distribución $q_\phi(\boldsymbol{z}|\boldsymbol{x})$ puede ser igualmente modelada como una red neuronal profunda. De cara a encontrar los parámetros óptimos de la red neuronal, necesitamos definir una función objetivo tratable. 
+
+Utilizando la inferencia variacional definida en el apartado anterior, restringiendo el espacio de búsqueda a la familia de funciones gaussianas, la función a optimizar tendría la forma siguiente:
+
+\begin{equation*}
+	\begin{array}{c}
+	(\boldsymbol{\mu}, \log \boldsymbol{\sigma}) = RedNeuralCodificador_\phi (\boldsymbol{x}) \\
+	q_\phi(\boldsymbol{z} | \boldsymbol{x}) = \mathcal{N}(\boldsymbol{z}; \boldsymbol{\mu}, diag(\boldsymbol{\sigma}))
+	\end{array}
+\end{equation*}
+
+Esto es, la red neuronal serviría para calcular, para cada uno de los componentes de $\boldsymbol{z}$, la media $\mu$ y desviación estándar $\sigma$ de una distribución normal que determinarían $q_\phi$, siendo $\phi$ realmente los parámetros que definen a $\boldsymbol{\mu}$ y $\boldsymbol{\sigma}$.
+
+En los métodos tradicionales de inferencia variacional los parámetros se optimizan de manera separada para cada punto de datos. En el caso del auto-codificador variacional, los parámetros se suponen comunes a todo el conjunto de datos. A esta aproximación al problema se la denomina \textit{inferencia variacional amortizada} \cite{gershman2014amortized} y permite la eliminación del bucle de optimización por punto de datos. Con esta suposición, implícitamente se está suponiendo que la expresividad de la red neuronal es suficiente para codificar la dependencia respecto a $\boldsymbol{x}$. Esto permite aprovechar la eficiencia del descenso de gradiente estocástico.
+
+\section{Optimización del ELBO mediante gradiente estocástico}
+
+Para poder utilizar al ELBO como función objetivo, es necesario derivar los gradientes respecto a $\theta$ y $\phi$. Dado un conjunto i.i.d. de datos $\mathcal{D}$ el ELBO se puede representar como:
+
+\begin{equation*}
+	\mathcal{L}_{\theta, \phi}(\mathcal{D}) = \sum\limits_{x \in \mathcal{D}} \mathcal{L}_{\theta, \phi}(\boldsymbol{x})
+\end{equation*}
+
+Normalmente, este objetivo suele ser intratable, aunque suele ser posible, tal como veremos a continuación, obtener buenos estimadores no sesgados que permitan llevar a cabo SGD.
+
+El gradiente respecto a $\theta$ suele ser fácil de obtener:
+
+\begin{equation*}
+	\begin{array}{cl}
+	\nabla_\theta \mathcal{L}_{\theta, \phi}(\boldsymbol{x}) & = \nabla_\theta \mathbb{E}_q [\log p_\theta(\boldsymbol{x}, \boldsymbol{z})] - \log q_\phi(\boldsymbol{z} | \boldsymbol{x})]\\
+	& = \mathbb{E}_q [\nabla_\theta (\log p_\theta(\boldsymbol{x}, \boldsymbol{z}))- \log q_\phi(\boldsymbol{z} | \boldsymbol{x})]\\
+	& = \mathbb{E}_q [\nabla_\theta (\log p_\theta(\boldsymbol{x}, \boldsymbol{z}))]\\
+	& \simeq \nabla_\theta \log p_\theta(\boldsymbol{x}, \boldsymbol{z})\\
+	\end{array}
+\end{equation*}
+
+La última linea corresponde con el estimador de la esperanza simple de Monte Carlo \cite{metropolis1949monte}.
+
+No es tan sencillo para el caso de $\nabla_\phi$, pues tal como veremos en la derivación presentada a continuación, $\mathbb{E}_q$ depende de $\phi$. 
+
+\begin{equation*}
+	\begin{array}{cl}
+		\nabla_\phi \mathcal{L}_{\theta, \phi}(\boldsymbol{x}) & =  \nabla_\theta \mathbb{E}_q [\log p_\theta(\boldsymbol{x}, \boldsymbol{z})] - \log q_\phi(\boldsymbol{z} | \boldsymbol{x})]\\
+		& \ne  \mathbb{E}_q \nabla_\theta[\log p_\theta(\boldsymbol{x}, \boldsymbol{z})] - \log q_\phi(\boldsymbol{z} | \boldsymbol{x})] \\
+	\end{array}
+\end{equation*}
+
+Para poder conseguir simplificar la esperanza, es necesario deshacer la dependencia de $\phi$. Esto es posible hacerlo realizando un cambio de variable que desligue el muestreo de $\phi$, esto es, convertir $\boldsymbol{z} \sim q_\phi (\boldsymbol{z} | \boldsymbol{x})$ en $\boldsymbol{\epsilon} \sim p(\boldsymbol{\epsilon})$ y expresar $\boldsymbol{z}$ como $\boldsymbol{z} = \boldsymbol{g}(\boldsymbol{\epsilon}, \boldsymbol{\phi}, \boldsymbol{x})$.
+
+Realizando dicho cambio de variable, la esperanza puede ser expresada como sigue:
+
+\begin{equation*}
+	\begin{array}{c}
+	\mathbb{E}_{\boldsymbol{z} \sim q_\phi (\boldsymbol{z} | \boldsymbol{x})} [f(\boldsymbol{z})] = \mathbb{E}_{\boldsymbol{\epsilon} \sim p(\boldsymbol{\epsilon})} [f(\boldsymbol{z})]\\
+	f(\boldsymbol{z}) = \log p_\theta(\boldsymbol{x}, \boldsymbol{z}) - \log q_\phi(\boldsymbol{z} | \boldsymbol{x})\\
+	\boldsymbol{z} = \boldsymbol{g}(\boldsymbol{\phi}, \boldsymbol{x}, \boldsymbol{\epsilon})\\
+	\end{array}
+\end{equation*}
+
+A partir de este cambio de variable, ya es posible derivar el estimador de Monte Carlo:
+
+\begin{equation*}
+	\begin{array}{cl}
+	\nabla_\phi \mathbb{E}_{\boldsymbol{z} \sim q_\phi (\boldsymbol{z} | \boldsymbol{x})} [f(\boldsymbol{z})] & = \nabla_\phi \mathbb{E}_{\boldsymbol{\epsilon} \sim p(\boldsymbol{\epsilon})} [f(\boldsymbol{z})]\\
+	& = \mathbb{E}_{\boldsymbol{\epsilon} \sim p(\boldsymbol{\epsilon})} \nabla_\phi  [f(\boldsymbol{z})]\\
+	& \simeq \nabla_\phi  [f(\boldsymbol{z})]\\
+\end{array}
+\end{equation*}
+
+Esta reparametrización $\boldsymbol{z} = \boldsymbol{g}(\boldsymbol{\phi}, \boldsymbol{x}, \boldsymbol{\epsilon})$ también permite expresar al ELBO como sigue:
+
+\begin{equation*}
+	\begin{array}{cl}
+	\mathcal{L}_{\theta,\phi}(\boldsymbol{x}) & = \mathbb{E}_{\boldsymbol{z} \sim q_\phi(\boldsymbol{z} | \boldsymbol{x})} [\log p_\theta(\boldsymbol{x}, \boldsymbol{z}) - \log q_\phi(\boldsymbol{z}|\boldsymbol{x})]\\
+	& = \mathbb{E}_{\boldsymbol{\epsilon} \sim p_{\boldsymbol{\epsilon}}} [\log p_\theta(\boldsymbol{x}, \boldsymbol{z}) - \log q_\phi(\boldsymbol{z}|\boldsymbol{x})]\\
+	\end{array}
+\end{equation*}
+
+A partir de esta expresión podemos derivar un estimador simple de Monte Carlo $\tilde{\mathcal{L}}_{\theta,\phi}(\boldsymbol{x})$ del ELBO de un punto utilizando una única muestra de ruido $\boldsymbol{\epsilon}$ de $p(\boldsymbol{\epsilon})$:
+
+\begin{equation*}
+	\begin{array}{c}
+	\boldsymbol{\epsilon} \sim p(\boldsymbol{\epsilon})\\
+	\boldsymbol{z} = \boldsymbol{g}(\boldsymbol{\phi}, \boldsymbol{x}, \boldsymbol{\epsilon})\\
+	\tilde{\mathcal{L}}_{\theta,\phi}(\boldsymbol{x}) = \log p_\theta(\boldsymbol{x}, \boldsymbol{z}) - \log q_\phi(\boldsymbol{z}|\boldsymbol{x})\\
+	\end{array}
+\end{equation*}
+
+Este estimador puede ser fácilmente calculado mediante librerías de cómputo con diferenciación automática de forma que sea sencillo calcular las derivadas respecto a los parámetros $\theta$ y $\phi$. El valor de $\nabla_\phi \tilde{\mathcal{L}}_{\theta,\phi}(\boldsymbol{x})$ se puede utilizar para optimizar el ELBO mediande descenso de gradiente \cite{kingma2013auto}. En el algoritmo \ref{alg:aevb} describe la operativa de optimización.
+
+\begin{algorithm}[H]
+	\caption{Optimización estocástica del ELBO. A este procedimiento de optimización se le denomina AEVB, i.e. \textit{auto-codificación bayesiana variacional}}
+	\begin{algorithmic}
+		\State
+		\State \textbf{Entrada:} $\mathcal{D}$, conjunto de datos de entrenamiento
+		\State \textbf{Parámetros:} $q_\phi(\boldsymbol{z}|\boldsymbol{x})$, modelo de inferencia
+		\State \textbf{Parámetros:} $p_\theta(\boldsymbol{x}, \boldsymbol{z})$, modelo generativo
+		\State
+		\begin{tabular}{ l l}
+			\textbf{1)} & ($\boldsymbol{\theta}$, $\boldsymbol{\phi}$) $\leftarrow$ Inicializacion\\
+			\textbf{2)} & \textbf{mientras} SGD no converja \textbf{hacer}\\
+			\textbf{3)} & \hspace{0.5cm} $\mathcal{M} \sim \mathcal{D}$ (seleccionar minibatch)\\
+			\textbf{4)} & \hspace{0.5cm} $\boldsymbol{\epsilon} \sim p(\boldsymbol{\epsilon})$ (ruido aleatorio disitinto para cada muestra de $\mathcal{M}$)\\
+			\textbf{5} & \hspace{0.5cm} Calcular $\tilde{\mathcal{L}}_{\theta,\phi}(\mathcal{M}, \boldsymbol{\epsilon})$ y sus gradientes $\nabla_{\theta, \phi} \tilde{\mathcal{L}}_{\theta,\phi}(\mathcal{M}, \boldsymbol{\epsilon})$\\
+			\textbf{6)} & \hspace{0.5cm}Actualizar $\theta$ y $\phi$ utilizando el optimizador SGD\\
+			\textbf{7)} & \textbf{fin}\\			
+		\end{tabular}
+	\end{algorithmic}
+	\label{alg:aevb}
+\end{algorithm}
+
+
+El gradiente utilizado es un estimador no sesgado del gradiente del ELBO. La media del muestreo sobre $\boldsymbol{\epsilon} \sim p(\boldsymbol{\epsilon})$ equivale al gradiente del ELBO sobre el punto considerado.
+
+\section{Cálculo de $q_\phi$}
+
+Para obtener el estimador del ELBO es necesario calcular la densidad $q_\phi (\boldsymbol{z}|\boldsymbol{x})$. El cálculo de este valor es sencillo si se escoge una transformación adecuada $\boldsymbol{g}$. La densidad $p(\boldsymbol{\epsilon})$ es conocida, pues corresponde con la densidad de la distribución escogida de antemano. 
+
+Si $\boldsymbol{g}(\cdot)$ es una función invertible, entonces las funciones de densidad de probabilidad de $\boldsymbol{\epsilon}$ y $\boldsymbol{z}$ están relacionadas por la siguiente expresión \footnote{Para prueba consultar apartado 1.6.10 en \cite{joramsoch20204305950}}:
+
+\begin{equation*}
+	\log q_\phi(\boldsymbol{z}|\boldsymbol{x}) = \log p(\boldsymbol{\epsilon}) - \log d_\phi(\boldsymbol{x}, \boldsymbol{\epsilon})
+\end{equation*}
+
+donde:
+
+\begin{equation*}
+	\log d_\phi(\boldsymbol{x}, \boldsymbol{\epsilon}) = \log \Big| det \Big( \frac{\partial \boldsymbol{z}}{\partial \boldsymbol{\epsilon}} \Big) \Big|
+\end{equation*}
+
+siendo
+
+\begin{equation*}
+	\frac{\partial \boldsymbol{z}}{\partial \boldsymbol{\epsilon}} = \frac{\partial (z_1, ..., z_k)}{\partial (\epsilon_1, ..., \epsilon_k)} = \begin{pmatrix}
+		\frac{\partial z_1}{\partial \epsilon_1} & \dots & \frac{\partial z_1}{\partial \epsilon_k}\\
+		\vdots & \ddots & \vdots\\
+		\frac{\partial z_k}{\partial \epsilon_1} & \dots & \frac{\partial z_k}{\partial \epsilon_k}
+	\end{pmatrix} 
+\end{equation*}
+
+\section{Posteriores Gaussianos}
+
+Es común escoger un codificador Gaussiano $q_\phi(\boldsymbol{z}|\boldsymbol{x}) = \mathcal{N}(\boldsymbol{z}; \boldsymbol{\mu}, diag(\boldsymbol{\sigma}^2))$:
+
+\begin{equation*}
+	\begin{array}{c}
+	(\boldsymbol{\mu}, \log \boldsymbol{\sigma}) = RedNeuralCodificador_\phi(\boldsymbol{x})\\
+	q_\phi (\boldsymbol{z}|\boldsymbol{x}) = \prod \limits_i q_\phi(z_i|\boldsymbol{x}) = \prod\limits_i \mathcal{N}(z_i; \mu_i, \sigma_i^2)\\
+	\end{array}
+\end{equation*}
+
+Que después de reparametrizar queda como:
+
+\begin{equation*}
+	\begin{array}{c}
+		\boldsymbol{\epsilon} \sim \mathcal{N}(0,\boldsymbol{I})\\
+		(\boldsymbol{\mu}, \log \boldsymbol{\sigma}) = RedNeuralCodificador(\boldsymbol{x})\\
+		\boldsymbol{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}\\
+	\end{array}
+\end{equation*}
+
+donde $\odot$ representa el producto elemento a elemento. La transformación Jacobiana de $\boldsymbol{\epsilon}$ a $\boldsymbol{z}$ es:
+\begin{equation*}
+\frac{\partial \boldsymbol{z}}{\partial \boldsymbol{\epsilon}} = diag(\boldsymbol{\sigma})
+\end{equation*}
+
+El logaritmo del determinante del Jacobiano, siguiendo las ecuaciones del aparatado anterior para el caso gaussiano se puede expresar como:
+
+\begin{equation*}
+	\log d_\phi(\boldsymbol{x}, \boldsymbol{\epsilon}) = \log \Big| det \Big( \frac{\partial \boldsymbol{z}}{\partial \boldsymbol{\epsilon}} \Big) \Big| = \sum\limits_i \log \sigma_i
+\end{equation*}
+
+y la densidad del posterior es:
+
+\begin{equation*}
+	\log q_\phi(\boldsymbol{z} | \boldsymbol{x}) = \sum\limits_i \log \mathcal{N}(\epsilon_i; 0, 1) - \log \sigma_i
+\end{equation*}
+
+cuando $\boldsymbol{z} = g(\boldsymbol{\epsilon}, \phi, \boldsymbol{x})$.
+
+\section{Posterior Gaussiano con matriz de covarianza general}
+
+El posterior gaussiano factorizado puede ser extendido al caso gaussiano con covarianza completa:
+
+\begin{equation*}
+	q_\phi(\boldsymbol{z}|\boldsymbol{x}) = \mathcal{N}(\boldsymbol{z};\boldsymbol{\mu}, \boldsymbol{\Sigma})
+\end{equation*}
+
+La reparametrización vendría dada por
+
+\begin{equation*}
+	\begin{array}{c}
+		\boldsymbol{\epsilon} \sim \mathcal{N}(0,\boldsymbol{I})\\
+		\boldsymbol{z} = \boldsymbol{\mu} + \boldsymbol{L} \boldsymbol{\epsilon}	
+	\end{array}
+\end{equation*}
+
+donde $\boldsymbol{L}$ es la matriz triangular superior (o inferior) con valores no nulos en la diagonal resultante de realizar la descomposición de Cholesky, esto es $\boldsymbol{\Sigma} = \boldsymbol{L} \boldsymbol{L}^T$. Se propone este cambio de variable ya que de esta forma el cálculo del Jacobiano es trivial: $\frac{\partial \boldsymbol{z}}{\partial \boldsymbol{\epsilon}} = \boldsymbol{L}$, resulta ser el producto de los elementos de la diagonal:
+
+\begin{equation*}
+	\log d_\phi(\boldsymbol{x}, \boldsymbol{\epsilon}) = \log \Big| det \Big( \frac{\partial \boldsymbol{z}}{\partial \boldsymbol{\epsilon}} \Big) \Big| = \sum\limits_i \log L_{ii}
+\end{equation*}
+
+Y la densidad logarítmica del posterior se puede representar como:
+
+\begin{equation*}
+	\log q_\phi(\boldsymbol{z} | \boldsymbol{x}) = \log p(\epsilon) - \sum\limits_i \log |L_{ii}|
+\end{equation*}
+
+Calculemos ahora la varianza de $\boldsymbol{z}$ para demostrar que se corresponde con la resultante de la descomposición de Cholesky:
+
+\begin{equation*}
+	\begin{array}{cl}
+	\boldsymbol{\Sigma}(\boldsymbol{z}) & = \mathbb{E} \big[ (\boldsymbol{z}-\mathbb{E}[\boldsymbol{z}])(\boldsymbol{z}-\mathbb{E}[\boldsymbol{z}])^T \big]\\
+	& = \mathbb{E} \big[ \boldsymbol{L} \boldsymbol{\epsilon} (\boldsymbol{L} \boldsymbol{\epsilon})^T \big] = \boldsymbol{L} \mathbb{E} \big[ \boldsymbol{\epsilon} \boldsymbol{\epsilon}^T \big] \boldsymbol{L}^T = \boldsymbol{L} \boldsymbol{L}^T
+	\end{array}
+\end{equation*}
+
+Hacer notar que $\mathbb{E} \big[ \boldsymbol{\epsilon} \boldsymbol{\epsilon}^T \big] = \boldsymbol{I}$ ya que $\boldsymbol{\epsilon} \sim \mathcal{N}(0, \boldsymbol{I})$.
+
+Una manera de calcular los parámetros de la función $q_\phi$ sería utilizar una red neuronal para predecir $\boldsymbol{\mu}$, $\boldsymbol{\Sigma}$. El problema de esta aproximación es que para calcular $\boldsymbol{L}$ a través de la descomposición de Cholesky, incurriríamos en un coste computacional $\mathcal{O}(n^3)$ para calcular $\boldsymbol{L}$. Una forma alternativa más económica computacionalmente es calcular directamente $\boldsymbol{L}$, por ejemplo, de la siguiente forma:
+
+\begin{equation*}
+	\begin{array}{c}
+	(\boldsymbol{\mu}, \log \boldsymbol{\sigma}, \boldsymbol{L}') \leftarrow RedNeuronalCodificador_\phi (\boldsymbol{x})\\
+	\boldsymbol{L} \leftarrow \boldsymbol{L}_{mask} \cdot \boldsymbol{L}' + diag(\boldsymbol{\sigma})
+	\end{array}
+\end{equation*}
+
+La red neuronal predice $\mu$, $\log \sigma$ y una matriz $\boldsymbol{L}'$. De esta última únicamente se consideran los elementos de debajo de la diagonal. Esto se hace aplicando una máscara $\boldsymbol{L}_{mask}$ para descartar los no necesarios. Este principio de derivación se utiliza en la variación de VAE denominada \textit{flujo auto-regresivo inverso}\cite{kingma2016improved}. 
+
+
+\section{Desafíos de la arquitectura}
+
+Uno de los problemas típicos al utilizar la optimización estocástica de los auto-codificadores variacionales es que durante el proceso de entrenamiento la red quede atrapada en una zona de equilibrio no óptimo que dificulte el progreso, dando como resultado redes deficientes. Distintas soluciones se han planteado para este problema, que quedan fuera del alcance de un capítulo introductorio a los VAEs. Para el que tenga interés en profundizar sobre este aspecto, puede consultar, por ejemplo \cite{bowman2015generating}, \cite{larsen2016autoencoding}, \cite{kingma2016improved}.
+
+Las características definitorias del método de los VAEs hacen que busquemos una aproximación $q_\phi(\boldsymbol{z}|\boldsymbol{x})$ a $p_\theta(\boldsymbol{z}|\boldsymbol{x})$. Cuando no es posible conseguir una buena aproximación, ya sea porque la función $q_\phi(\boldsymbol{z}|\boldsymbol{x})$ no sea suficientemente expresiva para aproximar a $p_\theta(\boldsymbol{z}|\boldsymbol{x})$, o bien por problemas en la optimización, nos encontremos con la generación de imágenes borrosas típicas de este tipo de arquitecturas. 
+
+\section{Posteriores no Gaussianos}
+
+Una forma de mejorar el rendimiento de los auto-codificadores variacionales es a través de la mejora de la flexibilidad del modelo de inferencia $q_\phi(\boldsymbol{z}|\boldsymbol{x})$. Mejorando la capacidad expresiva de la función tiene una incidencia directa en el ajuste del límite inferior de evidencia a la probabilidad marginal. Cualquier modificación del modelo de inferencia debe cumplir dos premisas (1) que sea computacionalmente eficiente de calcular y diferenciar, y (2) computacionalmente eficiente de muestrear, pues ambas operaciones deben ser realizadas para cada punto del minibatch, para cada iteración de optimización. También es deseable que el algoritmo sea paralelizable para los elementos de $\boldsymbol{z}$, pues esto permite trabajar con dimensiones altas del vector de variables latentes.
+
+\section{Propuestas de extensión del auto-codificador variacional original}
+
+En esta sección enumeramos algunas de las arquitecturas derivadas del auto-codificador variacional original \cite{kingma2013auto} que extienden sus características. 
+
+Entre ellas podemos encontrar las que siguen: 
+
+\begin{itemize}	
+	\item Structured VAE \cite{salimans2016structured}, Auxiliary Deep VAE \cite{maaloe2016auxiliary}, Conditional VAE \cite{sohn2015learning}: Estos tipos de VAE permiten condicionar el aprendizaje de los espacios latentes y la generación a distintos tipos de variables auxiliares.
+	\item Wasserstein autoencoders (WAE-MMD) \cite{tolstikhin2017wasserstein}, Sliced-Wasserstein VAE (SWAE) \cite{kolouri2018sliced}: VAEs que miden la distancia entre distribuciones mediante la distancia Wasserstein en vez de la divergencia Kullback-Leibler.
+	\item $\beta$-VAE \cite{higgins2016beta}, \cite{burgess2018understanding}, \cite{chen2018isolating}: Introduce una constante $\beta$ que se utiliza durante el proceso de entrenamiento para modificar el peso de la divergencia de Kullback-Leibler en la función objetivo. Esto incide en la capacidad de separación de las características representadas por las variables latentes.
+	\item Importance weighted autoencoders (IWAE) \cite{burda2015importance}, MIWAE \cite{rainforth2018tighter}: Utilizan una estimación más precisa del ELBO basada en el cálculo de varios valores de $\boldsymbol{\epsilon}$ por muestra. Esto permite obtener un ELBO más ajustado a $p(\boldsymbol{z}|\boldsymbol{x})$. 
+	\item Deep feature consistent VAE (DFCVAE) \cite{hou2017deep}: Añade a la función de pérdida de una VAE convencional, la suma de los MSEs obtenidos de comprarar las activaciones de la imagen original y la imagen reconstruida al paso de una CNN preentrenada. El objetivo es reducir la apariencia borrosa de las imágenes predichas por el VAE.
+	\item MS-SSIM-VAE \cite{snell2017learning} Utiliza funciones de pérdida basadas en el uso de métricas de similaridad perceptiva (combinación de luminancia, contraste y estructura).
+	\item Categorical VAE \cite{jang2016categorical}: Propone una implementación con el uso de variables latentes categóricas mediante una aproximación diferenciable a su distribución de probabilidad.
+	\item Joint-VAE \cite{dupont2018learning}: Propone el uso combinado de variables latentes continuas y discretas.
+	\item Info-VAE \cite{zhao2017infovae}: Propone una función de optimización alternativa para abordar el problema típico de los VAEs cuando el generador obvia parte de la información aprendida para el codificador, generando imágenes subóptimas. Para esto introduce un término el objetivo del cual el maximizar la información mutua entre el espacio latente y el espacio de generación.
+	\item LogCosh-VAE \cite{chen2018log}: Propone el uso de una función de pérdida alternativa basada en el logaritmo del coseno hiperbólico para mejorar la calidad visual de las imágenes reconstruidas.
+	\item DIP-VAE \cite{kumar2017variational} Propuesta alternativa para la separación de las variables latentes del VAE para datos no etiquetados.
+	\item Vector Quantized Variational Autoencoder (VQ-VAE) \cite{van2017neural}: Utiliza también un espacio latente discreto. Utiliza un "libro de códigos" para almacenar los valores permitidos para el vector del espacio latente. Los vectores presentes el el libro de códigos son aprendidos mediante descenso de gradiente.
+	\item Normalizing Flows \cite{rezende2015variational}, \cite{kobyzev2020normalizing} se construye una distribución flexible del posterior a través de un procedimiento iterativo. Se comienza con una variable aleatoria con una distribución relativamente simple con una conocida (y computacionalmente económica) función de densidad de probabilidad, para luego derivar por iteración una cadena de transformaciones invertibles parametrizadas de forma que la última iteración tenga una	distribución más flexible. Esta operativa no escala bien para espacios dimensionales grandes.
+	\item Inverse autoregressive Flow (IAF) \cite{kingma2016improved} Al igual que los flujos de normalización se empieza con
+	una distribución de probabilidad tratable (p.e. con una gaussiana con covarianza diagonal) seguido de una serie de transformaciones invertibles no lineales de $\boldsymbol{z}$. Se espera que la iteración final tenga una distribución flexible.
+\end{itemize}
+
+En \cite{Subramanian2020} podéis encontrar implementaciones de algunos de estos auto-codificadores variacionales.
+
+\section{Conclusiones}
+
+Los modelos probabilísticos son un pilar fundamental en el campo de la inteligencia artificial moderna. Los modelos probabilísticos con variables latentes permiten asociar variables observables con otras ocultas. Estos pueden utilizarse para descubrir abstracciones, en forma de variables latentes, que sirvan para interpretar las regularidades estadísticas observadas en los datos. Las distribuciones de probabilidad derivadas de relacionar dichas variables con las observables, pueden ser usadas a modo de función objetivo para el diseño de modelos predictivos de los datos procedentes de dichas distribuciones. El problema habitual en estos casos es que las relaciones entre distribuciones suelen implicar cálculos intratables desde un punto de vista computacional. La inferencia variacional (VI) permite convertir estos problemas intratables en otros tratables mediante optimización. La distribución de probabilidad que relaciona variables ocultas con observables, esto es, el posterior $p(oculta|datos)$, se aproxima con una distribución de probabilidad más sencilla (p.e. gaussiana) y se optimiza para que la distancia entre ésta y el posterior real sea lo más pequeña posible. Esto se hace introduciendo unos nuevos modelos paramétricos denominados variacionales. Las redes neuronales, gracias a su alta flexibilidad y expresividad, son un candidato perfecto para su optimización en estas circunstancias.
+
+La inferencia variacional en los VAEs realiza la optimización típicamente a través de un límite inferior de la evidencia (ELBO) mediante optimización por descenso de gradiente estocástico. El VAE resulta ser una combinación de un modelo profundo de variables latentes continuas y un modelo de inferencia asociado. El modelo de inferencia, denominado codificador o modelo de reconocimiento aproxima la distribución del posterior. Tanto el modelo generativo como el de inferencia son modelos probabilísticos basados en redes neuronales. Los parámetros de ambos modelos son optimizados de manera conjunta realizando descenso de gradiente sobre el límite inferior de evidencia (ELBO). El ELBO es un límite inferior sobre la probabilidad marginal de los datos, también llamado límite inferior variacional. Los gradientes estocásticos necesarios para la optimización son obtenidos mediante una reparametrización.
+
+Modificaciones posteriores se han realizado sobre el modelo inicial tanto para aumentar la expresividad del modelo generativo como para hacer más flexible el modelo de inferencia del posterior. Las primeras destinadas a aumentar la variabilidad de los datos generados para que incluyan toda la diversidad ya codificada en las variable latentes aprendidas por el modelo, las segundas destinadas a aumentar la flexibilidad del modelo de inferencia para hacer que el límite inferior de evidencia más próximo a la probabilidad marginal de los datos y, por tanto, aumentar la representatividad de variables latentes. Otro tipo de propuestas están destinadas a limitar la correlación entre los elementos del vector de variables latentes o incluso a usar una combinación de variables latentes discretas y continuas.
+
+Los VAEs se mantienen como una arquitectura de referencia para la derivación de modelos de inferencia de variables latentes asociadas a conjuntos de variables observadas continuas y discretas y para la síntesis de nuevas instancias pertenecientes a distribuciones de probabilidad próximas a la original.
+
+
+\chapter{Modelos generativos basados en difusión}
+\label{chap:dif}
+
+\section{Introducción}
+
+Los modelos generativos basados en difusión, propuestos por primera vez en \cite{sohl2015deep}, son un marco de diseño que permite generar nuevas imágenes mediante la reversión de procesos análogos a los encontrados en la termodinámica de no equilibrio. Si en un vaso de agua introducimos un líquido miscible de un color distinto, observaremos un proceso físico de difusión en el que de los dos líquidos se van mezclando progresivamente hasta finalmente formar una mezcla homogénea. Los modelos basados en difusión modelizan la reversión de este proceso.
+
+Los modelos de difusión se pueden aplicar a señales de distinta naturaleza, entre otras, a señales de audio e imagen. Para el caso de imagen, el proceso se inicia llevando a cabo un proceso de corrupción progresiva de los píxeles que la componen mediante la aplicación de ruido aleatorio, a modo de proceso de difusión natural. Una red neuronal es entrenada para la reversión de cada uno de los mencionados pasos de corrupción. Para que el proceso de reconstrucción resulte reversible es necesario realizar la corrupción de forma muy progresiva. Es habitual que el número de pasos necesarios sea del orden del millar. Si el entrenamiento de dicha red es exitoso será posible generar una imagen a partir de ruido aleatorio encadenando un número de pasos similar al utilizado para la deconstrucción de imágenes en tiempo de entrenamiento.
+
+
+\begin{figure}[ht!]
+	\titolfigura[1cm]{Figura \ref{fig:diffusion-objective}. Representación de la generación de imagen típico de un modelo generativo basado en mecanismos de difusión.}
+	\centering
+	\includegraphics[width=\textwidth]{figs/diffusion-objective.png}
+	\label{fig:diffusion-objective}
+	% \vspace{-5pt}\peufigura{Fuente: \url{http://www.ibmbigdatahub.com/infographic/four-vs-big-data}}
+\end{figure}
+
+\section{Formulación matemática}
+
+Los modelos de difusión son modelos generativos, esto es, son utilizados para generar nuevos datos. El mecanismo de funcionamiento consiste en dos etapas: una primera donde se procede a la corrupción incremental de los datos de entrada mediante de adición de ruido Gaussiano y una segunda donde se aprende a revertir cada uno de los estadios de corrupción aplicados previamente. Después del entrenamiento, las redes de reconstrucción entrenadas son capaces de generar nuevos datos a partir de ruido gaussiano mediante la aplicación sucesiva del proceso de reconstrucción previamente entrenado.
+
+Una cadena de Markov es un proceso estocástico en el cual la probabilidad de que suceda un evento depende únicamente del estado precedente, esto es, toda la información necesaria para predecir el estado siguiente está contenida en el estado actual, siendo, por tanto, independiente de todos los anteriores.
+
+
+Un modelo de difusión puede ser modelizado como una cadena de Markov donde los nodos representan los sucesivos estadios de la reconstrucción de los datos desde su estadio original hasta el final, representativo de los datos reconstruidos.
+
+Para revertir el proceso debemos ser capaces de modelizar $q(\boldsymbol{x}_t | \boldsymbol{x}_{t-1})$. La figura \ref{fig:diffusion-objective} representa el proceso  al que se somete cada imagen durante el entrenamiento. La cadena de Markov del proceso de difusión directa realiza una deconstrucción paulatina de los datos, añadiendo ruido de forma gradual, para obtener una aproximación al posterior $q(\boldsymbol{x}_{1:T}|\boldsymbol{x}_0)$, donde $\boldsymbol{x}_1, ..., \boldsymbol{x}_T,$ son variables latentes de las misma dimensiones que $\boldsymbol{x}_0$. Al final del proceso se acaba transformando la imagen original en ruido gaussiano.
+
+\begin{figure}[ht!]
+	\titolfigura[1cm]{Figura \ref{fig:diffusion-markov-blur}. Representación de la cadena de Markov representativa del proceso de deconstrucción de una imagen.}
+	\centering
+	\includegraphics[width=\textwidth]{figs/diffusion-markov-blur.png}
+	\label{fig:diffusion-markov-blur}
+	% \vspace{-5pt}\peufigura{Fuente: \url{http://www.ibmbigdatahub.com/infographic/four-vs-big-data}}
+\end{figure}
+
+La red generativa utiliza la información generada como medio de optimización del modelo de reconstrucción del proceso inverso. La función generativa corresponde a la distribución de probabilidad $p_\theta(\boldsymbol{x}_{t-1} | \boldsymbol{x_t})$. La cadena de Markov representativa del proceso de reconstrucción se muestra en la figura \ref{fig:diffusion-markov-reconstruct}.
+
+\begin{figure}[ht!]
+	\titolfigura[1cm]{Figura \ref{fig:diffusion-markov-reconstruct}. Representación de la cadena de Markov representativa del proceso de reconstrucción de una imagen.}
+	\centering
+	\includegraphics[width=\textwidth]{figs/diffusion-markov-reconstruct.png}
+	\label{fig:diffusion-markov-reconstruct}
+	% \vspace{-5pt}\peufigura{Fuente: \url{http://www.ibmbigdatahub.com/infographic/four-vs-big-data}}
+\end{figure}
+
+Los modelos basados en difusión son capaces de generar imágenes de alta calidad sin requerir entrenamiento adversario típico de las GANs. Las dificultades de la optimización de las redes GAN ya ha sido tratada en el capítulo correspondiente. Los modelos de difusión presentan beneficios de escalabilidad y paralelización respecto a otros tipos de modelos generativos como el mencionado.
+
+\section{Modelos probabilísticos de eliminación del ruido producido por difusión}
+
+Los modelos de difusión son modelos de variables latentes de la forma $p_\theta(\boldsymbol{x}_0) = \int p_\theta(\boldsymbol{x}_0, ..., \boldsymbol{x}_T) d\boldsymbol{x}_1 ... d\boldsymbol{x}_T$, donde $\boldsymbol{x}_1 ... \boldsymbol{x}_T$ son variables latentes de la mismas dimensiones que los datos $\boldsymbol{x}_0 \sim q(\boldsymbol{x}_0)$. 
+
+\subsection{Proceso directo de difusión}
+
+Dado un punto de muestreo $\boldsymbol{x}_0 \sim q(\boldsymbol{x})$, definimos el proceso directo de difusión como aquel en el que añadimos ruido Gaussiano a la muestra original en $T$ pasos sucesivos, produciendo una secuencia de muestras $\boldsymbol{x}_1, ..., \boldsymbol{x}_T$. El tamaño del cambio se controla mediante el parámetro $\{ \beta_t \in (0,1)\}_{t=1}^T$.
+
+\begin{equation*}
+	\begin{array}{c}
+	q(\boldsymbol{x}_t | \boldsymbol{x}_{t-1}) = \mathcal{N}(\boldsymbol{x}_t; \sqrt{1-\beta_t} \boldsymbol{x}_{t-1}, \beta_t \boldsymbol{I})\\
+	q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0) = \prod\limits_{t=1}^T q(\boldsymbol{x}_t|\boldsymbol{x}_{t-1})
+	\end{array}
+\end{equation*}
+
+La muestra $\boldsymbol{x}_0$ pierde gradualmente sus atributos distinguibles. Con $T \rightarrow \infty$, $\boldsymbol{x}_T$ tiende a una distribución isotrópica Gaussiana, p.e. $\mathcal{N}(\boldsymbol{0}, \boldsymbol{I})$. 
+
+Una propiedad interesante que a continuación demostramos, es que para cualquier $t$ es posible obtener en un único paso la muestra $\boldsymbol{x}_t$: 
+
+Sea $\alpha_t = 1 - \beta_t$ y $\overline{\alpha}_t = \prod\limits_{i=1}^t \alpha_i$ entonces, 
+
+\begin{equation*}
+	\begin{array}{rll}
+		\boldsymbol{x}_t & = \sqrt{\alpha}_t \boldsymbol{x}_{t-1} + \sqrt{1-\alpha_t} \boldsymbol{\epsilon}_{t-1}; & \boldsymbol{\epsilon}_i \sim \mathcal{N}(\boldsymbol{0},\boldsymbol{1})\\
+		& = \sqrt{\alpha_{t} \alpha_{t-1}} \boldsymbol{x}_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} \overline{\boldsymbol{\epsilon}}_{t-2}; & \overline{\boldsymbol{\epsilon}}_{t-2} \sim \mathcal{N}(\boldsymbol{0}, \sqrt{1-\alpha_t\alpha_{t-1}})\\
+		& = ...&\\
+		& = \sqrt{\overline{\alpha}_t}\boldsymbol{x}_0 + \sqrt{1 - \overline{\alpha}_t} \boldsymbol{\epsilon}&\\  
+		q(\boldsymbol{x}_t|\boldsymbol{x}_0) & = \mathcal{N}(\boldsymbol{x}_t; \sqrt{\overline{\alpha}_t}\boldsymbol{x}_0,(1-\overline{\alpha}_t)\boldsymbol{I})& 
+	\end{array}
+\end{equation*}
+
+Por lo general, conforme se avanza en el proceso de corrupción, es posible realizar pasos de actualización más grandes, por lo que $\beta_1 \lt \beta_2 \lt ... \lt \beta_T$ y, por tanto, $\overline{\alpha}_1 \gt \overline{\alpha}_2 \gt ... \gt \overline{\alpha}_T$.
+
+\textB{Suma de dos Gaussianas:}{La suma de dos distribuciones Gaussianas $\mathcal{N}(0,\sigma_1^2 I)$ y $\mathcal{N}(0,\sigma_2^2 I)$ es $\mathcal{N}(0, (\sigma_1^2 + \sigma_2^2)I)$}
+
+Hasta ahora hemos visto cómo derivar $q(\boldsymbol{x}_t, \boldsymbol{x}_0)$. Para derivar $q(\boldsymbol{x}_t)$ sabemos que $q(\boldsymbol{x}_t) = \int q(\boldsymbol{x}_0, \boldsymbol{x}_t) d\boldsymbol{x}_0 = \int q(\boldsymbol{x}_t | \boldsymbol{x}_0) q(\boldsymbol{x}_0) d\boldsymbol{x}_0$, entonces podemos muestrear $\boldsymbol{x}_t \sim q(\boldsymbol{x}_t)$ en dos pasos: primero muestreando $\boldsymbol{x}_0 \sim q(\boldsymbol{x}_0)$ de los datos de entrada y después muestreando $\boldsymbol{x}_t \sim q(\boldsymbol{x}_t | \boldsymbol{x}_0)$, esto es, muestreo ancestral. 
+
+A continuación vamos a derivar la expresión de $q(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t,\boldsymbol{x}_0)$. Combinando la aplicación de la regla de bayes y la expresión de la función gaussiana tenemos:
+
+\begin{equation*}
+	\begin{array}{rl}
+		q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) 
+		&= q(\mathbf{x}_t \vert \mathbf{x}_{t-1}, \mathbf{x}_0) \frac{ q(\mathbf{x}_{t-1} \vert \mathbf{x}_0) }{ q(\mathbf{x}_t \vert \mathbf{x}_0) } \\
+		&\propto \exp \Big(-\frac{1}{2} \big(\frac{(\mathbf{x}_t - \sqrt{\alpha_t} \mathbf{x}_{t-1})^2}{\beta_t} + \frac{(\mathbf{x}_{t-1} - \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0)^2}{1-\bar{\alpha}_{t-1}} - \frac{(\mathbf{x}_t - \sqrt{\bar{\alpha}_t} \mathbf{x}_0)^2}{1-\bar{\alpha}_t} \big) \Big) \\
+		&= \exp \Big(-\frac{1}{2} \big(\frac{\mathbf{x}_t^2 - 2\sqrt{\alpha_t} \mathbf{x}_t \mathbf{x}_{t-1} + \alpha_t \mathbf{x}_{t-1}^2 }{\beta_t} + \frac{ \mathbf{x}_{t-1}^2 - 2 \sqrt{\bar{\alpha}_{t-1}} \mathbf{x}_0 \mathbf{x}_{t-1} + \bar{\alpha}_{t-1} \mathbf{x}_0^2  }{1-\bar{\alpha}_{t-1}} - \frac{(\mathbf{x}_t - \sqrt{\bar{\alpha}_t} \mathbf{x}_0)^2}{1-\bar{\alpha}_t} \big) \Big) \\
+		&= \exp\Big( -\frac{1}{2} \big( (\frac{\alpha_t}{\beta_t} + \frac{1}{1 - \bar{\alpha}_{t-1}}) \mathbf{x}_{t-1}^2 - (\frac{2\sqrt{\alpha_t}}{\beta_t} \mathbf{x}_t + \frac{2\sqrt{\bar{\alpha}_{t-1}}}{1 - \bar{\alpha}_{t-1}} \mathbf{x}_0) \mathbf{x}_{t-1}  + C(\mathbf{x}_t, \mathbf{x}_0) \big) \Big)
+	\end{array}
+\end{equation*}
+
+Expresando lo términos en función de una distribución estándar gaussiana tenemos que:
+
+\begin{equation*}
+\begin{array}{rl}
+	\tilde{\beta}_t 
+	&= 1/(\frac{\alpha_t}{\beta_t} + \frac{1}{1 - \bar{\alpha}_{t-1}}) 
+	= 1/(\frac{\alpha_t - \bar{\alpha}_t + \beta_t}{\beta_t(1 - \bar{\alpha}_{t-1})})
+	= \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t \\
+	\tilde{\boldsymbol{\mu}}_t (\mathbf{x}_t, \mathbf{x}_0)
+	&= (\frac{\sqrt{\alpha_t}}{\beta_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1} }}{1 - \bar{\alpha}_{t-1}} \mathbf{x}_0)/(\frac{\alpha_t}{\beta_t} + \frac{1}{1 - \bar{\alpha}_{t-1}}) \\
+	&= (\frac{\sqrt{\alpha_t}}{\beta_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1} }}{1 - \bar{\alpha}_{t-1}} \mathbf{x}_0) \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \cdot \beta_t \\
+	&= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} \mathbf{x}_0\\
+\end{array}
+\end{equation*}
+
+Sabemos que $\mathbf{x}_0 = \frac{1}{\sqrt{\bar{\alpha}_t}}(\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t)$, introduciendo esta expresión en la de $\tilde{\mu}_t$ obtenemos:
+
+\begin{equation*}
+\begin{array}{rl}
+	\tilde{\boldsymbol{\mu}}_t (\boldsymbol{x}_t, \boldsymbol{\epsilon}_t)
+	&= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \mathbf{x}_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} \frac{1}{\sqrt{\bar{\alpha}_t}}(\mathbf{x}_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t) \\
+	&= \frac{1}{\sqrt{\alpha_t}} \Big( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon}_t \Big)
+\end{array}
+\end{equation*}
+
+A pesar de que $q(\boldsymbol{x}_{t-1} | \boldsymbol{x}_{t})$ es intratable, se demuestra que $q(\boldsymbol{x}_{t-1} | \boldsymbol{x}_{t}, \boldsymbol{x}_0)$ es tratable, $q(\mathbf{x}_{t-1} \vert \mathbf{x}_t, \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_{t-1}; \tilde{\boldsymbol{\mu}}(\mathbf{x}_t, \mathbf{x}_0), \tilde{\beta}_t \mathbf{I})$.
+
+
+\subsection{Proceso de difusión inverso o de reconstrucción}
+
+Si fuera posible revertir el proceso descrito en el apartado anterior y obtener muestras de la distribución $q(\boldsymbol{x}_{t-1} | \boldsymbol{x}_t)$ entonces sería posible reconstruir una muestra real a partir de una entrada de ruido Gaussiano, $\boldsymbol{x}_T \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})$. 
+
+Una forma de hacerlo es estimar $q(\boldsymbol{x}_{t-1} | \boldsymbol{x}_t)$  mediante el uso de un modelo paramétrico $p_\theta$ que aproxime dichas probabilidades condicionales. Para $\beta_t$ suficientemente pequeño, $q(\boldsymbol{x}_{t-1} | \boldsymbol{x}_t)$  se puede aproximar a una distribución normal. Se decide aproximar $q(\boldsymbol{x}_{t-1} | \boldsymbol{x}_t)$ mediante un modelo paramétrico $p_\theta$ como una distribución gaussiana y parametrizar su media y su varianza: 
+
+
+\begin{equation*}
+	\begin{array}{c}
+		p(\boldsymbol{x}_T) = \mathcal{N}(\boldsymbol{x}_T; \boldsymbol{0}, \boldsymbol{I})\\
+		p_\theta(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t) = \mathcal{N}(\boldsymbol{x}_{t-1}; \boldsymbol{\mu}_\theta(\boldsymbol{x}_t, t), \boldsymbol{\Sigma}_\theta (\boldsymbol{x}_t, t)))\\
+		\boldsymbol{\Sigma}_\theta (\boldsymbol{x}_t, t) = \sigma_t \boldsymbol{I}
+	\end{array}
+\end{equation*}
+
+$\mu_\theta(\boldsymbol{x}_t, t)$ se suele parametrizar como una red neuronal (comúnmente utilizando la arquitectura U-Net o bien el auto-codificador atenuador de ruido).
+
+Si aplicamos la ecuación de inversión para todos los pasos (trayectoria) podemos ir de $\boldsymbol{x}_T$ hasta la distribución de los datos:
+
+\begin{equation*}
+	p_\theta(\boldsymbol{x}_0, ..., \boldsymbol{x}_T) = p_\theta(\boldsymbol{x}_T) \prod \limits_{t=1}^T p_\theta(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t)
+\end{equation*}
+
+\subsection{Función de pérdida}
+
+Para poder encontrar los parámetros óptimos del modelo de inversión, debemos buscar una forma de conectar el proceso de difusión directa (representado por la distribución $q$) con el proceso inverso (distribución $p_\theta$). Una función objetivo podría ser la siguiente:
+
+\begin{equation*}
+	- \log p(\boldsymbol{x}_0) \le - \log p(\boldsymbol{x}_0) + D_{KL} (q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0) || p_\theta(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0))
+\end{equation*}
+
+En el caso ideal que $q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)$ y $p_\theta(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)$ fueran iguales, la desigualdad se convertiría en igualdad.
+
+Manipulando la expresión anterior:
+
+\begin{equation*}
+	\begin{array}{ll}
+		- \log p(\boldsymbol{x}_0) & \le - \log p(\boldsymbol{x}_0) + D_{KL} (q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0) || p_\theta(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0))\\
+		& = - \log p(\boldsymbol{x}_0) + \mathbb{E}_{\boldsymbol{x}_1, ..., \boldsymbol{x}_T} \sim q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x_0}) \Big[ \log \frac{q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_0, ..., \boldsymbol{x}_T) / p_\theta(\boldsymbol{x}_0)} \Big]\\
+		& = - \log p(\boldsymbol{x}_0) + \mathbb{E}_q \Big[ \log \frac{q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_0, ..., \boldsymbol{x}_T)}  + \log p_\theta(\boldsymbol{x}_0)\Big]\\
+		& = \mathbb{E}_q \Big[ \log \frac{q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_0, ..., \boldsymbol{x}_T)}\Big] = L_{VLB}\\
+		L_{VLB} & \ge - \mathbb{E}_{q(\boldsymbol{x}_0)} \log p_\theta (\boldsymbol{x_0})
+	\end{array}
+\end{equation*}
+
+Se puede llegar al mismo resultado partiendo de la desigualdad de Jensen:
+
+\begin{equation*}
+	\begin{array}{ll}
+		L_{CE} & = - \mathbb{E}_{q(\boldsymbol{x}_0)} \log p_\theta (\boldsymbol{x_0})\\
+		& = - \mathbb{E}_{q(\boldsymbol{x}_0)} \log \Big(\int p_\theta(\boldsymbol{x}_0, ..., \boldsymbol{x}_T) d\boldsymbol{x}_1 ... d\boldsymbol{x}_T\Big)\\
+		& = - \mathbb{E}_{q(\boldsymbol{x}_0)} \log \Big(\int q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0) \frac{p_\theta(\boldsymbol{x}_0, ..., \boldsymbol{x}_T)}{q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)}  d\boldsymbol{x}_1 ... d\boldsymbol{x}_T\Big)\\
+		& = \mathbb{E}_{q(\boldsymbol{x}_0)} \log \Big( \mathbb{E}_{q_{(\boldsymbol{x}_1}, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)} \frac{p_\theta (\boldsymbol{x}_0, ..., \boldsymbol{x}_T)}{q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)} \Big)\\
+		& \le - \mathbb{E}_{q_{(\boldsymbol{x}_0, ..., \boldsymbol{x}_T)}} \log \Big(  \frac{p_\theta (\boldsymbol{x}_0, ..., \boldsymbol{x}_T)}{q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)} \Big)\\
+		& = \mathbb{E}_{q_{(\boldsymbol{x}_0, ..., \boldsymbol{x}_T)}} \log \Big(  \frac{q(\boldsymbol{x}_1, ..., \boldsymbol{x}_T | \boldsymbol{x}_0)}{p_\theta (\boldsymbol{x}_0, ..., \boldsymbol{x}_T)} \Big) = L_{VLB}\\
+	\end{array}
+\end{equation*}
+
+Para convertir cada término de la ecuación para que sea analíticamente computable, el objetivo se puede reescribir como una combinación de varios términos de divergencia KL y entropía (Apéndice B de \cite{sohl2015deep}) llegando a la siguiente expresión:
+
+\begin{equation*}
+	\begin{array}{ll}
+		L_{VLB}  & = \mathbb{E}_{q(\boldsymbol{x}_{0}, ..., \boldsymbol{x}_{T})} \Big[ \log\frac{q(\boldsymbol{x}_{1}, ..., \boldsymbol{x}_{T}\vert\boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_{0}, ..., \boldsymbol{x}_{T})} \Big] \\  
+		& = \mathbb{E}_q \Big[ \log\frac{\prod_{t=1}^T q(\boldsymbol{x}_t\vert\boldsymbol{x}_{t-1})}{ p_\theta(\boldsymbol{x}_T) \prod_{t=1}^T p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t) } \Big] \\  
+		& = \mathbb{E}_q \Big[ -\log p_\theta(\boldsymbol{x}_T) + \sum_{t=1}^T \log \frac{q(\boldsymbol{x}_t\vert\boldsymbol{x}_{t-1})}{p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t)} \Big] \\  
+		& = \mathbb{E}_q \Big[ -\log p_\theta(\boldsymbol{x}_T) + \sum_{t=2}^T \log \frac{q(\boldsymbol{x}_t\vert\boldsymbol{x}_{t-1})}{p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t)} + \log\frac{q(\boldsymbol{x}_1 \vert \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1)} \Big] \\  
+		& = \mathbb{E}_q \Big[ -\log p_\theta(\boldsymbol{x}_T) + \sum_{t=2}^T \log \Big( \frac{q(\boldsymbol{x}_{t-1} \vert \boldsymbol{x}_t, \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t)}\cdot \frac{q(\boldsymbol{x}_t \vert \boldsymbol{x}_0)}{q(\boldsymbol{x}_{t-1}\vert\boldsymbol{x}_0)} \Big) + \log \frac{q(\boldsymbol{x}_1 \vert \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1)} \Big] \\  
+		& = \mathbb{E}_q \Big[ -\log p_\theta(\boldsymbol{x}_T) + \sum_{t=2}^T \log \frac{q(\boldsymbol{x}_{t-1} \vert \boldsymbol{x}_t, \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t)} + \sum_{t=2}^T \log \frac{q(\boldsymbol{x}_t \vert \boldsymbol{x}_0)}{q(\boldsymbol{x}_{t-1} \vert \boldsymbol{x}_0)} + \log\frac{q(\boldsymbol{x}_1 \vert \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1)} \Big] \\  
+		& = \mathbb{E}_q \Big[ -\log p_\theta(\boldsymbol{x}_T) + \sum_{t=2}^T \log \frac{q(\boldsymbol{x}_{t-1} \vert \boldsymbol{x}_t, \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t)} + \log\frac{q(\boldsymbol{x}_T \vert \boldsymbol{x}_0)}{q(\boldsymbol{x}_1 \vert \boldsymbol{x}_0)} + \log \frac{q(\boldsymbol{x}_1 \vert \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1)} \Big]\\  
+		& = \mathbb{E}_q \Big[ \log\frac{q(\boldsymbol{x}_T \vert \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_T)} + \sum_{t=2}^T \log \frac{q(\boldsymbol{x}_{t-1} \vert \boldsymbol{x}_t, \boldsymbol{x}_0)}{p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t)} - \log p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1) \Big] \\  
+		& = \mathbb{E}_q [\underbrace{D_{KL}(q(\boldsymbol{x}_T \vert \boldsymbol{x}_0) \parallel p_\theta(\boldsymbol{x}_T))}_{L_T} + \sum_{t=2}^T \underbrace{D_{KL}(q(\boldsymbol{x}_{t-1} \vert \boldsymbol{x}_t, \boldsymbol{x}_0) \parallel p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_t))}_{L_{t-1}} \underbrace{- \log p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1)}_{L_0} ] 
+	\end{array}
+\end{equation*}
+
+donde $q(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t, \boldsymbol{x}_0)$ es la versión tratable de la distribución del posterior.
+
+Etiquetando cada componente del ELBO separadamente tenemos:
+
+\begin{equation*}
+	\begin{array}{ll}
+		& L_{VLB} = L_T + L_{T-1} + \dots + L_0 \\ 
+		\text{donde } &\\
+		& L_T = D_{KL}(q(\boldsymbol{x}_T \vert \boldsymbol{x}_0) \parallel p_\theta(\boldsymbol{x}_T)) \\ 
+		& L_t = D_{KL}(q(\boldsymbol{x}_t \vert \boldsymbol{x}_{t+1}, \boldsymbol{x}_0) \parallel p_\theta(\boldsymbol{x}_t \vert\boldsymbol{x}_{t+1})) \text{ para } 1 \leq t \leq T-1 \\
+		& L_0 = - \log p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1) 
+	\end{array}	
+\end{equation*}
+
+Analicemos cada uno de los términos:
+
+\begin{enumerate}
+	\item $\mathbb{E}_{q(x_1 | x_0)} [\log p_\theta(\boldsymbol{x}_0 \vert \boldsymbol{x}_1)]$ Puede ser interpretado como un término de reconstrucción similar al ELBO de un autocodificador variacional. En \cite{ho2020denoising} modeliza $L_0$ utilizando un decodificador discreto separado derivado de $\mathcal{N}(\boldsymbol{x}_o; \boldsymbol{\mu}_\theta(\boldsymbol{x}_1,1), \boldsymbol{\Sigma}_\theta(\boldsymbol{x}_1,1))$
+	\item  $D_{KL}(q(\boldsymbol{x}_T \vert \boldsymbol{x}_0) \parallel p_\theta(\boldsymbol{x}_T))$ muestra cuánto de cerca se encuentra $\boldsymbol{x}_T$ de la función Gaussiana estándard. El término no tiene parámetros entrenables y, por tanto, es ignorado durante el entrenamiento.
+	\item  $D_{KL}(q(\boldsymbol{x}_t \vert \boldsymbol{x}_{t+1}, \boldsymbol{x}_0) \parallel p_\theta(\boldsymbol{x}_t \vert\boldsymbol{x}_{t+1})) \text{ para } 1 \leq t \leq T-1$, calcula la diferencia entre cada uno de los pasos inversos $p_\theta(\boldsymbol{x}_{t-1} \vert\boldsymbol{x}_{t})$ y los aproximados $q(\boldsymbol{x}_{t-1} \vert \boldsymbol{x}_{t}, \boldsymbol{x}_0)$
+\end{enumerate}
+
+Todos los términos de $L_{VLB}$ (excepto $L_0$) establecen comparaciones entre distribuciones Gaussianas y, por tanto, pueden ser calculadas de forma exacta. A través del ELBO, maximizar la probabilidad se reduce a aprender los pasos de eliminación del ruido $L_t$.
+
+Como tanto $q(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t)$ como $p_\theta(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t)$ son distribuciones normales, la divergencia de Kullback-Leibler se puede expresar de forma analítica como:
+
+\begin{equation*}
+	L_{t-1} = D_{KL}(q(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t, \boldsymbol{x}_0) || p_\theta(\boldsymbol{x}_{t-1}|\boldsymbol{x}_t)) = \mathbb{E}_q \Big[ \frac{1}{2 \sigma^2_t} || \tilde{\mu}_t (\boldsymbol{x}_{t}, \boldsymbol{x}_{0}) - \mu_\theta (\boldsymbol{x}_{t}, t) ||^2 \Big] + C
+\end{equation*}
+
+Sabemos que $\boldsymbol{x}_t = \sqrt{\overline{\alpha}_t}\boldsymbol{x}_0 + \sqrt{1 - \overline{\alpha}_t}$ y que $\tilde{\mu}_t (\boldsymbol{x}_{t}, \boldsymbol{x}_{0}) = \frac{1}{\sqrt{1-\beta_t}}\Big( \boldsymbol{x}_t - \frac{\beta_t}{\sqrt{1- \overline{\alpha}_t}}\Big)$, entonces se puede representar la función paramétrica $\mu_\theta(\boldsymbol{x}_t, t)$ como un modelo paramétrico de predicción del ruido $\epsilon_\theta(\boldsymbol{x}_t, t)$:
+
+\begin{equation*}
+	\begin{array}{c}
+		\boldsymbol{\mu}_\theta(\boldsymbol{x}_t, t) = \frac{1}{\sqrt{\boldsymbol{\alpha}_t}}\Big( \boldsymbol{x}_t - \frac{\boldsymbol{\beta}_t}{\sqrt{1 - \overline{\boldsymbol{\alpha}}_t}} \epsilon_\theta (\boldsymbol{x}_t, t)\Big)\\
+	\end{array}
+\end{equation*}
+
+La función de pérdida quedaría representada de la forma siguiente:
+
+\begin{equation*}
+	\begin{array}{c}
+		L_{t-1} = \mathbb{E}_{\boldsymbol{x}_0 \sim q(\boldsymbol{x}_0), \epsilon \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})} \Big[ \lambda_t || \epsilon - \epsilon_\theta (\boldsymbol{x}_t, t) ||^2 \Big] + C\\
+		\lambda_t = \frac{\beta^2_t}{2 \sigma^2_t (1 - \beta_t)(1-\overline{\alpha}_t)}\\	
+		\boldsymbol{x}_t = \sqrt{\overline{\alpha}_t} \boldsymbol{x}_0 + \sqrt{1 - \overline{\alpha}_t}\epsilon\\
+	\end{array}
+\end{equation*}
+
+El valor de $\lambda_t$ es un peso que pondera la importancia en función del tiempo. Este valor suele ser bastante grande para valores de $t$ pequeños. En \cite{ho2020denoising} observan que estableciendo $\lambda_t = 1$ mejora la calidad del muestreo. Alineado con esta decisión ellos usan la función de pérdida siguiente:
+
+\begin{equation*}
+	L_{\text{simple}} = \mathbb{E}_{x_0 \sim q(x_0), \epsilon \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I}), l \sim \mathcal{U}(1,T)} \Big[ || \epsilon - \epsilon_\theta (\boldsymbol{x}_t,t) ||^2 \Big]
+\end{equation*}
+
+Otras estrategias avanzadas de ponderación de $\lambda_t$ pueden consultarse en \cite{choi2022perception}.
+
+
+\subsection{Proceso de muestreo y entrenamiento}
+
+Los algoritmos \ref{alg:diffussion-train} y \ref{alg:diffussion-muestreo} presentados a continuación describen el proceso de entrenamiento y de muestreo respectivamente presentado en esta sección.
+
+\begin{algorithm}[H]
+	\caption{Difusión: Algoritmo de entrenamiento}
+	\begin{algorithmic}
+		\State
+		\begin{tabular}{ l l}
+			\textbf{1)} & \textbf{repetir}\\
+			\textbf{2)} & \; $\boldsymbol{x}_0 \sim q(\boldsymbol{x}_0)$\\
+			\textbf{3)} & \; $t \sim \text{Uniform}(\{1,..., T\}\})$\\
+			\textbf{4)} & \; $\boldsymbol{\epsilon} \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})$\\
+			\textbf{5)} & \; Descenso de gradiente con $\nabla_\theta \|\boldsymbol{\epsilon}_t - \boldsymbol{\epsilon}_\theta(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_t, t)\|^2$\\
+			\textbf{6)} & \textbf{hasta} convergencia\\
+		\end{tabular}
+	\end{algorithmic}
+	\label{alg:diffussion-train}
+\end{algorithm}
+
+
+\begin{algorithm}[H]
+	\caption{Difusión: Algoritmo de muestreo}
+	\begin{algorithmic}
+		\State
+		\begin{tabular}{ l l}
+			\textbf{1)} & $\boldsymbol{x}_T \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})$\\
+			\textbf{2)} & \textbf{para} t = T,..., 1 \textbf{hacer}\\
+			\textbf{3)} & \; $\boldsymbol{z} \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})$ si $t \gt 1$ sino $\boldsymbol{z} = \boldsymbol{0}$\\
+			\textbf{4)} & \; $\boldsymbol{x}_{t-1} = \frac{1}{\sqrt{\boldsymbol{\alpha}_t}} \Big( \boldsymbol{x}_t - \frac{1-\boldsymbol{\alpha}_t}{\sqrt{1- \overline{\boldsymbol{\alpha}}_t}}\epsilon_\theta(\boldsymbol{x}_t, t) \Big) + \boldsymbol{\sigma}_t \boldsymbol{z}$\\
+			\textbf{5)} & \textbf{fpara}\\
+			\textbf{6)} & \textbf{retorna} $\boldsymbol{x}_0$\\
+		\end{tabular}
+	\end{algorithmic}
+	\label{alg:diffussion-muestreo}
+\end{algorithm}
+
+\subsection{Implementación}
+
+Los modelos basados en mecanismos de difusión presentados hasta el momento para representar $\epsilon_\theta(\boldsymbol{x}_t,t)$ varían ligeramente dependiendo de la publicación pero suelen coincidir en la utilización de arquitecturas basadas en U-Net \cite{ronneberger2015u} con bloques Wide ResNet \cite{zagoruyko2016wide} y etapas de autoatención. La representación de $t$ se suele hacer o bien mediante los embeddings posicionales típicos de los transformadores \cite{vaswani2017attention} o bien mediante atributos de Fourier aleatorios \cite{rahimi2007random}. No hay ninguna razón que impida que futuras arquitecturas utilicen otras propuestas distintas.
+
+\subsection{Parametrización de $\beta_t$ y $\Sigma_\theta$}
+
+Hemos visto que $\beta_t$ y $\sigma_t^2$ controlan la varianza del proceso de difusión directo e inverso respectivamente. Es habitual utilizar un sistema de distribución lineal para $\beta_t$ y fijar $\Sigma_\theta = \sigma_t^2 = \beta_t.$
+
+Por ejemplo, \cite{ho2020denoising} las varianzas $\beta_t$ se  fijan de modo que sean una secuencia de constantes crecientes desde $\beta_1 = 10^{-4}$ hasta $\beta_T = 0.02$. Son relativamente pequeñas comparadas con el rango normalizado de los valores admisibles para los píxeles, que en dicho trabajo está en el intervalo $[-1,1]$. En dicho trabajo. la varianza del proceso inverso no es un valor paramétrico sino que es una constante $\boldsymbol{\Sigma}_\theta(\boldsymbol{x}_t,t) = \sigma_t \boldsymbol{I}$, donde $\sigma_t$ es $\beta_t$ o bien $\tilde{\beta}_t = \frac{1-\overline{\alpha}_{t-1}}{1-\overline{\alpha}_t} \beta_t$. En dicho artículo las muestras generadas son de alta calidad pero aún no consiguen valores competitivos en lo referente a verosimilitud.
+
+En \cite{nichol2021improved} se proponen varias técnicas para conseguir mejores resultados en lo que a verosimilitud se refiere. Una de dichas mejoras consiste cambiar la evolución lineal de $\beta_t$ por una tipo coseno. El objetivo del cambio no es tanto la función escogida en sí, sino el hecho de conseguir un cambio pequeño en los dos extremos $1$ y $T$ y un cambio lineal en los valores intermedios. Para $\boldsymbol{\Sigma}_\theta(\boldsymbol{x}_t,t)$ proponen interpolar entre los valores $\beta_t$ y $\tilde{\beta}_t$ mediante la función $\boldsymbol{\Sigma}_\theta(\boldsymbol{x}_t,t) = \exp(\boldsymbol{v} \log \beta_t + (1-\boldsymbol{v} \log \tilde{\beta}_t))$. Para integrar $\boldsymbol{\Sigma}_\theta(\boldsymbol{x}_t,t)$ en la función de pérdida, modifican la función original por $L_{\text{hibrida}} = L_{\text{simple}} + \lambda L_{\text{VLB}}$, con $\lambda=0.001$, utilizando $\lambda L_{\text{VLB}}$ para aprender la varianza pero no la media debido a que comprueban experimentalmente que $\lambda L_{\text{VLB}}$ es difícil de optimizar debido a que tiene gradientes muy variables. Dadas estas circunstancia, para facilitar el proceso de aprendizaje proponen el uso de una media movil ponderada.
+
+
+En \cite{kingma2021variational} se utiliza un nuevo tipo de parametrización utilizando la razón de señal a ruido (SNR) y se muestra como optimizar la reversión minimizando un objetivo variacional.
+
+Mediante la minimización de un objetivo variacional, otros trabajos entrenan $\sigma_t^2$ al mismo tiempo que se optimiza el modelo de difusión \cite{nichol2021improved} y otros después \cite{bao2022analytic}.
+
+\subsection{Conexión con los VAEs}
+
+Los modelos de difusión pueden ser considerados como una forma particular de VAEs jerárquicos. Las diferencias esenciales residen en el hecho que el codificador está prefijado, las dimensiones del espacio latente son las mimas que las de los datos originales, el modelo de eliminación de ruido es el mismo para todos los pasos y que el modelo es entrenado con alguna modificación de los pesos que forman el límite variacional.
+
+\subsection{Resumen}
+
+En esta sección hemos introducido los modelos probabilísticos de eliminación del ruido por difusión. El modelo se entrena tomando muestras de un proceso de difusión directa a través del entrenamiento de un modelo de reversión capaz de predecir el ruido. Los puntos claves del diseño residen en la arquitectura de red escogida, la ponderación de los objetivos de optimización y la elección de los parámetros de difusión que controlan el proceso (como la distribución del ruido de generación). En \cite{karras2022elucidating} se puede encontrar un compendio de las decisiones de diseño relevantes a la hora de diseñar un modelo de difusión.
+		
+\section{Generación basada en puntuación mediante el uso de ecuaciones diferenciales}
+
+\subsection{Recordatorio de ecuaciones diferenciales}
+
+Las ecuaciones diferenciales ordinarias (ODE) tienen la forma siguiente:
+
+\begin{equation*}
+	\frac{d\boldsymbol{x}}{dt} = \boldsymbol{f} (\boldsymbol{x}, t)
+\end{equation*}
+
+La solución analítica de este tipo de ecuaciones tiene la forma:
+
+\begin{equation*}
+	\boldsymbol{x}(t) = \boldsymbol{x}(0) + \int_{0}^t \boldsymbol{f}(\boldsymbol{x}, \tau) d\tau
+\end{equation*}
+
+La solución numérica se puede conseguir iterativamente mediante:
+
+\begin{equation*}
+	\boldsymbol{x}(t + \Delta t) \approx \boldsymbol{x}(t) + \boldsymbol{f}(\boldsymbol{x}(t), t) \Delta t
+\end{equation*}
+
+Por otro lado, las ecuaciones diferenciales estocásticas (SDE) toman la forma siguiente:
+
+Las ecuaciones diferenciales ordinarias (ODE) tienen la forma siguiente:
+
+\begin{equation*}
+	\frac{d\boldsymbol{x}}{dt} = \boldsymbol{f} (\boldsymbol{x}, t) + \sigma(\boldsymbol{x},t) \boldsymbol{\omega}_t
+\end{equation*}
+
+donde a $\boldsymbol{f}(\boldsymbol{x}, t)$ se le denomina coeficiente de deriva y a $\boldsymbol{\sigma}(\boldsymbol{x}, t)$, coeficiente de difusión.
+
+La solución numérica en este caso toma la forma siguiente:
+
+\begin{equation*}
+	\boldsymbol{x}(t+\Delta t) \approx \boldsymbol{x}(t) + \boldsymbol{f}(\boldsymbol{x}(t),t)\Delta t + \sigma(\boldsymbol{x}(t), t)\sqrt{\Delta t} \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})
+\end{equation*}
+
+\subsection{El proceso de difusión directa como una SDE}
+
+Consideremos de nuevo el proceso de difusión directa definido en la sección anterior:
+
+\begin{equation*}
+q(\boldsymbol{x}_t, \boldsymbol{x}_{t-1}) = \mathcal{N} (\boldsymbol{x}_t; \sqrt{1-\beta_t}\boldsymbol{x}_{t-1}, \beta_t\boldsymbol{I})	
+\end{equation*}
+
+Si consideramos pasos infinitesimales podemos expresar a $\boldsymbol{x}_t$ como:
+
+\begin{equation*}
+	\begin{array}{rl}
+	\boldsymbol{x}_t & = \sqrt{1-\beta_t}\boldsymbol{x}_{t-1} + \sqrt{\beta_t} \mathcal{N} (\boldsymbol{0}, \boldsymbol{I})\\
+	& = \sqrt{1-\beta(t)\Delta t}\boldsymbol{x}_{t-1} + \sqrt{\beta(t)\Delta t} \mathcal{N} (\boldsymbol{0}, \boldsymbol{I})\\	
+	\text{donde} \, \beta_t = \beta(t)\Delta t \\
+	\end{array}
+\end{equation*}
+
+Aplicando la expansion de Taylor obtenemos:
+
+
+\begin{equation*}
+	\begin{array}{rl}
+		\boldsymbol{x}_t & \approx \boldsymbol{x}_{t-1} - \frac{\beta(t)\Delta t}{2}\boldsymbol{x}_{t-1}+\sqrt{\beta(t)\Delta t} \mathcal{N} (\boldsymbol{0}, \boldsymbol{I}) 
+	\end{array}
+\end{equation*}
+
+De la que, llevándola al límite, podemos derivar la Ecuación diferencial estocástica (SDE) que describe la difusión en el límite infinitesimal:
+
+\begin{equation*}
+	\begin{array}{rl}
+		d \boldsymbol{x}_t & = - \frac{1}{2} \beta(t) \boldsymbol{x}_{t} dt +\sqrt{\beta(t)} d \boldsymbol{\omega}_t
+	\end{array}
+\end{equation*}
+
+Atendiendo a la nomenclatura de ecuaciones diferenciales, el término $- \frac{1}{2} \beta(t) \boldsymbol{x}_t dt$ se correspondería con el término de deriva y el término $\sqrt{\beta(t)} d \omega_t$ con el término de difusión, que es el que inyecta el ruido.
+
+Una ecuación más general para el SDE utilizada en modelos generativos de difusión sería la siguiente:
+
+\begin{equation*}
+	d \boldsymbol{x}_t = f(t) \boldsymbol{x}_t dt + g(t) d\boldsymbol{\omega}_t
+\end{equation*}
+
+\subsection{El proceso de difusión inverso mediante SDEs}
+
+Visto el proceso directo, ¿Cómo se lleva a cabo el proceso inverso? La ecuación para llevar a cabo el proceso inverso generativo de difusión, introducida en \cite{anderson1982reverse} y propuesta para el proceso de generación de imágenes en \cite{song2020score} es la siguiente:
+
+\begin{equation*}
+	d \boldsymbol{x}_t = \Big[ - \frac{1}{2} \beta(t) \boldsymbol{x}_t - \beta(t) \nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t) \Big] dt + \sqrt{\beta(t)} d \overline{\boldsymbol{\omega}}_t
+\end{equation*}
+
+donde $\nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t)$ es la función de puntuación, $\sqrt{\beta(t)} d \overline{\boldsymbol{\omega}}_t$ el término de difusión. $- \frac{1}{2} \beta(t) \boldsymbol{x}_t - \beta(t) \nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t)$ representa al término de deriva.
+
+\subsection{Función de puntuación}
+
+Un aspecto importante es definir la manera de determinar la función de puntuación. Una estrategia podría consistir en intentar modelizar dicha función mediante una regresión:
+
+\begin{equation*}
+	\min \limits_\theta \mathbb{E}_{t \sim \mathcal{U}(0,T)} \mathbb{E}_{\boldsymbol{x}_t \sim q_t(\boldsymbol{x}_t)} || s_{\boldsymbol{\theta}}(\boldsymbol{x}_t, t) - \nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t) ||_2^2
+\end{equation*}
+
+Donde $t$ es el paso temporal de difusión, $\boldsymbol{x}_t$ los datos difundidos, $s_{\boldsymbol{\theta}}$ la red neuronal que pretendería modelizar a la función de puntuación y $\nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t)$ la puntuación marginal de los datos difundidos \cite{vincent2011connection}. El problema es que $\nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t)$ resulta intratable.
+
+En vez de utilizar el marginal, se puede realizar la difusión de puntos individuales aprovechando el hecho de que $q_t(\boldsymbol{x}_t | \boldsymbol{x}_0)$ es tratable. De esta manera podemos expresar la función objetivo del siguiente modo:
+
+\begin{equation*}
+	\min \limits_\theta \mathbb{E}_{t \sim \mathcal{U}(0,T)} \mathbb{E}_{\boldsymbol{x}_0 \sim q_0(\boldsymbol{x}_0)} \mathbb{E}_{\boldsymbol{x}_t \sim q_t(\boldsymbol{x}_t) | \boldsymbol{x}_0)} || s_{\boldsymbol{\theta}}(\boldsymbol{x}_t, t) - \nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t | \boldsymbol{x}_0) ||_2^2
+\end{equation*}
+
+Después de aplicadas las esperanzas resulta que, $s_{\boldsymbol{\theta}}(\boldsymbol{x}_t, t) \approx \nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t)$ que es precisamente la función que pretendemos aproximar.
+
+Para la SDE que preserva la varianza sabemos que:
+
+\begin{equation*}
+\begin{array}{c}
+	d\boldsymbol{x}_t = - \frac{1}{2} \beta(t) \boldsymbol{x}_t dt + \sqrt{\beta(t)}d\boldsymbol{\omega}_t\\
+	q_t(\boldsymbol{x}_t|\boldsymbol{x}_0) = \mathcal{N}(\boldsymbol{x}_t;\gamma_t \boldsymbol{x}_0, \sigma_t^2\boldsymbol{I})\\
+	\gamma_t = e^{ - \frac{1}{2} \int_0^t \beta(s)ds} \\
+	\sigma_t^2 = 1 - e^{- \int_0^t\beta(s)ds}	
+\end{array}
+\end{equation*}
+
+A modo de detalles de implementación, el muestreo se puede re-expresar del siguiente modo:
+
+\begin{equation*}
+	\begin{array}{cl}
+	\text{Muestreo:} & \boldsymbol{x}_t = \gamma_t \boldsymbol{x}_0 + \sigma_t \boldsymbol{\epsilon} \;\;\;\;\;\; \boldsymbol{\epsilon} \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})\\
+	\text{Puntuación:} & \nabla_{\boldsymbol{x}_t} \log q_t(\boldsymbol{x}_t | \boldsymbol{x}_0) = \nabla_{\boldsymbol{x}_t} \frac{(\boldsymbol{x}_t - \gamma_t \boldsymbol{x}_0)^2}{2 \sigma_t^2} = - \frac{\boldsymbol{\epsilon}}{\sigma_t}\\
+	\text{Red neuronal modelo:} & s_{\boldsymbol{\theta}}(\boldsymbol{x}_t,t) := \frac{\epsilon_{\boldsymbol{\theta}}(\boldsymbol{x}_t,t)}{\sigma_t}\\
+	\end{array}
+\end{equation*}
+
+Con lo que la función de optimización se puede expresar del siguiente modo:
+
+\begin{equation*}
+	\min \limits_\theta \mathbb{E}_{t \sim \mathcal{U}(0,T)} \mathbb{E}_{\boldsymbol{x}_0 \sim q_0(\boldsymbol{x}_0)} \mathbb{E}_{\boldsymbol{\epsilon} \sim \mathcal{N}(\boldsymbol{0},\boldsymbol{I})} \frac{1}{\sigma^2_ t} || \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_{\boldsymbol{\theta}} (\boldsymbol{x}_t,t) ||^2_2
+\end{equation*}
+
+Donde el la red neuronal alternativa a optimizar, para predicción del ruido es $\boldsymbol{\epsilon}_{\boldsymbol{\theta}} (\boldsymbol{x}_t,t)$.
+
+Una modificación adicional que se puede implementar es introducir una variable $\lambda(t)$ que permita modificar el peso de los distintos constituyentes de la función de pérdida; esto es, de las diferentes partes del proceso de difusión:
+
+\begin{equation*}
+	\min \limits_\theta \mathbb{E}_{t \sim \mathcal{U}(0,T)} \mathbb{E}_{\boldsymbol{x}_0 \sim q_0(\boldsymbol{x}_0)} \mathbb{E}_{\boldsymbol{\epsilon} \sim \mathcal{N}(\boldsymbol{0},\boldsymbol{I})} \frac{\lambda(t)}{\sigma^2_ t} || \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_{\boldsymbol{\theta}} (\boldsymbol{x}_t,t) ||^2_2
+\end{equation*}
+
+Modificando su valor es posible optimizar para la obtención de buenos resultados perceptuales $\lambda(t) = \sigma_t^2$ o bien para la maximización de la verosimilitud $\lambda(t) = \beta(t)$.
+
+Hemos presentado esta posibilidad pero es posible la utilización de modelos con parametrizaciones más sofisticadas \cite{karras2022elucidating}.
+
+Finalmente, en \cite{song2021maximum} se introducen una serie de modificaciones destinadas a reducir la varianza y mejorar la estabilidad numérica que se traducen en la siguiente propuesta de función de pérdida:
+
+\begin{equation*}
+	\min \limits_\theta \mathbb{E}_{t \sim r(t)} \mathbb{E}_{\boldsymbol{x}_0 \sim q_0(\boldsymbol{x}_0)} \mathbb{E}_{\boldsymbol{\epsilon} \sim \mathcal{N}(\boldsymbol{0},\boldsymbol{I})} \frac{1}{r(t)} \frac{\lambda(t)}{\sigma^2_ t} || \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_{\boldsymbol{\theta}} (\boldsymbol{x}_t,t) ||^2_2
+\end{equation*}
+
+Donde $r(t)$ es una función de muestreo de la importancia. $r(t) \propto \frac{\lambda(t)}{\sigma_t^2}$. Para detalles concretos de implementación consultar la bibliografía.
+
+\section{Conclusiones}
+
+En este capítulo hemos brindado una introducción a los modelos de difusión, los cuales tienen la capacidad de revertir el proceso de difusión directa y recuperar la imagen original que ha sido degradada. Hemos explorado dos enfoques para modelar esta reversión: los modelos probabilísticos y los basados en ecuaciones diferenciales. No obstante, es importante destacar que el campo de los modelos de difusión es mucho más amplio y complejo que lo que se ha presentado en este capítulo, y abarca muchos otros aspectos que no hemos podido cubrir en su totalidad. Este tema es uno de los más relevantes en el ámbito de los modelos generativos, y está en constante evolución y expansión. Para poder profundizar en este tema de manera exhaustiva, sería necesario dedicar una asignatura completa, y aun así sería difícil abarcar todos los aspectos y avances que se han producido. El objetivo de esta introducción es sentar las bases para que los estudiantes interesados puedan adentrarse en este complejo espacio de conocimiento de manera autónoma y continuar explorando las múltiples posibilidades que ofrece el uso de modelos de difusión en la generación de imágenes.
+
+%%%%%%%%
+% RESUM %
+%%%%%%%%
+\newpage
+\previs[Resumen]
+
+Un modelo generativo es un tipo de modelo de aprendizaje automático que tiene la capacidad de crear nuevos datos a partir de un conjunto de datos de entrenamiento. Estos modelos son ampliamente utilizados en diversas aplicaciones, como la generación de imágenes, la síntesis de voz y la creación de música. A través de la generación de nuevos datos, los modelos generativos pueden ser utilizados para realizar tareas como la simulación, la predicción y la exploración de nuevas posibilidades. En general, los modelos generativos están en constante evolución y expansión, lo que hace que sea un tema de gran interés en el ámbito de la inteligencia artificial y el aprendizaje automático.
+
+En este módulo hemos presentado varios tipos de modelos generativos, incluyendo las redes de generación adversarias, los autocodificadores variacionales y los modelos basados en mecanismos de difusión. Los modelos generativos de texto se tratan en un módulo separado, el de transformadores. 
+
+El objetivo de la bibliografía presentada en este módulo es servir como punto de partida para aquellos estudiantes que deseen ampliar sus conocimientos en este campo, aunque no pretende ser exhaustiva. Es importante tener en cuenta que los conocimientos presentados en este módulo están sujetos a una continua investigación y evolución, por lo que es necesaria una constante actualización. 
+
+El objetivo ha sido presentar los conocimientos fundamentales que sirven como base para entender los refinamientos introducidos en las publicaciones más recientes.
+
+%%%%%%%%%%
+% GLOSSARI %
+%%%%%%%%%%
+\newpage
+\epileg{Glosario}
+
+\textbf{Variational autoencoders (VAE)} es el término inglés para referirse a los auto-codificadores variacionales.  XXXXXXXXXX
+
+\textbf{Generative Adversarial Networks (GAN)} es el término en inglés para referirse a las redes adversarias generativas.XXXXXXXXXXXX
+
+
+%%%%%%%%%%%%%
+% BIBLIOGRAFIA %
+%%%%%%%%%%%%%
+%Definición manual de bibliografía
+\newpage
+\bibliografia
+%\textbf{Autor} (Año). \textit{Título de la obra}. Lugar: editorial.
+
+\bibliographystyle{unsrt}
+\bibliography{generativos}
+
+%%%%%%%%%%
+% GLOSSARI %
+%%%%%%%%%%
+\newpage
+\epileg{Diccionario de términos técnicos asociados (inglés-español)}
+
+\textbf{General adversarial networks (GAN)} Redes adversarias/antagónicas generativas
+
+
+
+
+\newpage
+\epileg{Diccionario de términos técnicos asociados (español-inglés)}
+
+\textbf{General Adversarial Networks}
+
+%Definición de bibliografia mediante BiBTeX
+%\biblioes
+
+%PAGINA FINAL EN BLANCO
+%\newpage
+%\mbox{ }
+%\thispagestyle{empty}
+
+\end{document}
